@@ -10,5 +10,5 @@
  * - until later stable release of vorth, the documentation will be minimal;
  */
 
-import { Test } from './src/Test.mjs';
-export { Test };
+import { Vorth } from './src/Vorth.mjs';
+export { Vorth };
