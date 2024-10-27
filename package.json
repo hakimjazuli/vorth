@@ -1,6 +1,6 @@
 {
 	"name": "vorth",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"description": "client side routing and renderer for classic static MPA",
 	"main": "index.mjs",
 	"types": "./types/index.d.mts",
