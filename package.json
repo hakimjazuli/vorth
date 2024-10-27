@@ -9,8 +9,8 @@
 	"main": "index.mjs",
 	"module": "index.mjs",
 	"devDependencies": {
-		"concurrently": "^9.0.1",
-		"@html_first/js_lib_template": "^1.3.11"
+		"@html_first/js_lib_template": "^1.3.11",
+		"concurrently": "^9.0.1"
 	},
 	"bugs": {
 		"url": "https://github.com/hakimjazuli/vorth/issues"
@@ -33,8 +33,5 @@
 	},
 	"sideEffects": false,
 	"type": "module",
-	"types": "./types/index.d.mts",
-	"dependencies": {
-		"virst": "^0.12.3"
-	}
+	"types": "./types/index.d.mts"
 }
