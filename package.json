@@ -33,5 +33,8 @@
 	},
 	"sideEffects": false,
 	"type": "module",
-	"types": "./types/index.d.mts"
+	"types": "./types/index.d.mts",
+	"dependencies": {
+		"virst": "^0.12.3"
+	}
 }
