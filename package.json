@@ -9,11 +9,11 @@
 	"main": "index.mjs",
 	"module": "index.mjs",
 	"devDependencies": {
-		"@html_first/js_lib_template": "^1.3.11",
+		 "@html_first/js_lib_template": "link:@html_first/js_lib_template",
 		"concurrently": "^9.0.1"
 	},
-	"peerDependencies": {
-		"virst": "^0.12.3"
+	"dependencies": {
+		"virst": "link:virst"
 	},
 	"bugs": {
 		"url": "https://github.com/hakimjazuli/vorth/issues"
@@ -28,11 +28,12 @@
 		"static",
 		"client side router",
 		"client side routing",
-		"attributeName"
+		"attributeName",
+		"prebundled"
 	],
 	"license": "MIT",
 	"scripts": {
-		"dev": "concurrently  \"bun --watch ./dev/index.mjs\" \"bun tsc --watch\" \"bun build --minify --watch ./index.mjs --outfile=./build/index.mjs --format=esm\""
+		"dev": "concurrently  \"bun --watch ./dev/index.mjs\" \"bun tsc --watch\" \"bun build --minify --watch ./dev/bundle.mjs --outfile=./prebundled.mjs --format=esm\""
 	},
 	"sideEffects": false,
 	"type": "module",

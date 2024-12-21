@@ -1,2 +1,1 @@
-export { Vorth };
-import { Vorth } from './src/Vorth.mjs';
+export { Vorth } from "./src//Vorth.mjs";
