@@ -73,7 +73,7 @@
  * };
  * ```
  * > - which you can reference with `mrefOptions.signalRef` on the relative path it's pointing to;
- * > - in the `mrefOptions.$`, you can reference return value of `mrefOptions.signalRef`, to create `effects`, which is a `callback` that will be called everytime there's changes on the value of that `reference` called in the `$` `callback` parameter, unless it's nested value like array or object, in wich you need to fire `call$` in the element lifecyle;
+ * > - in the `mrefOptions.$`, you can reference return value of `mrefOptions.signalRef`, to create `effects`, which is a `callback` that will be called everytime there's changes on the value of that `reference` called in the `$` `callback` parameter, unless it's nested value like array(using array modification method) or object, in wich you need to fire `call$` in the element lifecyle, unless you want to use reassignment syntax using spreading operator;
  * > - the destructured { value } returned `mrefOptions.signalRef`, can be reassigned to trigger changes, except the endpoint that are exporting function type;
  * > > - the function type is to tell `Vorth` that this is a `derived` `signal`, that are dependent on other `signal`;
  * ## documentation for signal
@@ -103,16 +103,10 @@ export class Vorth {
      */
     private cachedLet;
     /**
-     * @param {any} value
-     * @returns
-     */
-    isObjectOrArray: (value: any) => boolean;
-    /**
      * @private
-     * @param {string} importPath
-     * @returns {Promise<vorth|false>}
+     * @returns {void}
      */
-    private importVorth;
+    private setBase;
     /**
      * @private
      * @type {string}
@@ -120,9 +114,10 @@ export class Vorth {
     private base;
     /**
      * @private
-     * @returns {void}
+     * @param {string} importPath
+     * @returns {Promise<vorth|false>}
      */
-    private setBase;
+    private importVorth;
     /**
      * @private
      * @param {string} relativePath
