@@ -57,9 +57,12 @@
  * > - recommended to install `lit-plugin` in vs-code for syntax highlighting;
  * - for data layer, on the `/your/prefix/path/your/relative/path/signal.mjs`, export default of `any` type:
  * ```js
+ * // optional mode
+ * export const mode = 'session'; // 'local'|'session', default is false
+ * // and one of example bellow
  * export default '';
  * // or
- * export default 1;
+ * export default 0;
  * // or
  * export default [];
  * // or
@@ -99,7 +102,7 @@ export class Vorth {
     private chacedRef;
     /**
      * @private
-     * @type {Map<string, Let<any>>}
+     * @type {Map<string, [Let<any>, 'local'|'session'|false]>}
      */
     private cachedLet;
     /**
@@ -118,6 +121,12 @@ export class Vorth {
      * @returns {Promise<vorth|false>}
      */
     private importVorth;
+    /**
+     * @private
+     * @param {string} relativePath
+     * @returns {string}
+     */
+    private storagePath;
     /**
      * @private
      * @param {string} relativePath

@@ -61,9 +61,12 @@ import { $, Derived, Let, Lifecycle } from 'virst';
  * > - recommended to install `lit-plugin` in vs-code for syntax highlighting;
  * - for data layer, on the `/your/prefix/path/your/relative/path/signal.mjs`, export default of `any` type:
  * ```js
+ * // optional mode
+ * export const mode = 'session'; // 'local'|'session', default is false
+ * // and one of example bellow
  * export default '';
  * // or
- * export default 1;
+ * export default 0;
  * // or
  * export default [];
  * // or
@@ -111,7 +114,7 @@ export class Vorth {
 	chacedRef = new Map();
 	/**
 	 * @private
-	 * @type {Map<string, Let<any>>}
+	 * @type {Map<string, [Let<any>, 'local'|'session'|false]>}
 	 */
 	cachedLet = new Map();
 	/**
@@ -181,22 +184,75 @@ export class Vorth {
 	/**
 	 * @private
 	 * @param {string} relativePath
+	 * @returns {string}
+	 */
+	storagePath = (relativePath) => `vorth-s-${relativePath}`;
+	/**
+	 * @private
+	 * @param {string} relativePath
 	 * @returns {Promise<signalRef_|false>}
 	 */
 	signalRef = async (relativePath) => {
+		const storageName = this.storagePath(relativePath);
 		const signal = this.cachedLet.get(relativePath);
-		if (signal) {
+		if (signal instanceof Derived) {
 			// @ts-ignore
-			return signal;
+			return signal[0];
+		}
+		/**
+		 * NOWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+		 * NOWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+		 * NOWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+		 * NOWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+		 * NOWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+		 * NOWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+		 * NOWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+		 * NOWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+		 * NOWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+		 * NOWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+		 * NOWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+		 * NOWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+		 * NOWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+		 * NOWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+		 * NOWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+		 * NOWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+		 */
+		if (signal) {
+			const mode = signal[1] ?? false;
+			switch (mode) {
+				case 'local':
+					signal[0].value = localStorage.getItem(storageName);
+					break;
+				case 'session':
+					signal[0].value = sessionStorage.getItem(storageName);
+					break;
+			}
+			// @ts-ignore
+			return signal[0];
 		}
 		const path_ = `${this.base}${relativePath}.mjs`;
 		try {
-			const newRef = (await import(`${path_}${this.cacheDate}`)).default;
+			const newRef = await import(`${path_}${this.cacheDate}`);
+			const mode = newRef.mode;
+			const default_ = newRef.default;
 			if (typeof newRef === 'function') {
-				this.cachedLet.set(relativePath, new Derived(newRef));
+				this.cachedLet.set(relativePath, [new Derived(default_), mode]);
+			} else {
+				const signal_ = new Let(default_);
+				this.cachedLet.set(relativePath, [new Let(default_), mode]);
+				new $(async () => {
+					const value = signal_.value;
+					switch (mode) {
+						case 'local':
+							localStorage.setItem(storageName, value);
+							break;
+						case 'session':
+							sessionStorage.setItem(storageName, value);
+							break;
+					}
+				});
 			}
-			this.cachedLet.set(relativePath, new Let(newRef));
-			return newRef;
+			return default_;
 		} catch (error) {
 			console.error({
 				path: path_,
