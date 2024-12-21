@@ -1,6 +1,6 @@
 {
 	"name": "vorth",
-	"version": "0.0.5",
+	"version": "0.8.0",
 	"author": "hakim_jazuli",
 	"repository": {
 		"type": "git",
@@ -9,7 +9,7 @@
 	"main": "index.mjs",
 	"module": "index.mjs",
 	"devDependencies": {
-		 "@html_first/js_lib_template": "link:@html_first/js_lib_template",
+		"@html_first/js_lib_template": "link:@html_first/js_lib_template",
 		"concurrently": "^9.0.1"
 	},
 	"dependencies": {
