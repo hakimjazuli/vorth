@@ -10,7 +10,8 @@
 	"module": "index.mjs",
 	"devDependencies": {
 		"@html_first/js_lib_template": "link:@html_first/js_lib_template",
-		"concurrently": "^9.0.1"
+		"concurrently": "^9.0.1",
+		"vorth": "link:vorth"
 	},
 	"dependencies": {
 		"virst": "link:virst"

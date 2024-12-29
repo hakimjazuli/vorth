@@ -3,87 +3,104 @@
  * how to use:
  * - download the `prebundled.mjs`, and load it on your html:
  * ```html
- * <script type="module" src="/path/to/the/prebundled.mjs"></script>
+ * <script type="module" src="/your/vort_root/path/prebundled.mjs"></script>
  * ```
- * - add this `meta tag` on your `html` `head`:
+ * - add `vorth` and `your/relative/path/module` as `attribute` on the element:
  * ```html
- * <meta property="vorth" content="/your/prefix/path/" />
+ * <div vorth="your/relative/path/module"></div>
  * ```
- * > - `/your/prefix/path/` as in prefix for path of `vorth` function located;
- * - add `vorth` and `your/relative/path/function` as attribute on the element:
- * ```html
- * <div vorth="your/relative/path/function"></div>
- * ```
- * > - meaning it will target `/your/prefix/path/your/relative/path/function.mjs`;
- * > - as some `build` might bundle or rename `.js` in its production buld, we only support `.mjs` file;
- * - element lifecycle paste this type helper on `/your/prefix/path/your/relative/path/function.mjs`:
+ * - `vorthLifecycle`: paste this type helper on `/your/vort_root/path/lifecycles/your/relative/path/module.mjs`(the `lifecycles/` is fixed path):
  * ```js
  * /**
- *  * @typedef {{value:any,call$:()=>void,remove$:(effect:{effect:()=>void})=>void}} signalRef_
- *  * @typedef {Object} onViewPortInstance
- *  * @property {() => Promise<void>} disconnect
- *  * @property {(element: Element | HTMLElement) => onViewPortHandler} handlers
- *  * @typedef {Object} onViewPortHandler
- *  * @property {()=>void} removeOnExitViewCallback
- *  * @property {()=>void} removeOnViewCallback
- *  * @property {()=>void} unobserveElement
- *  * @typedef {elementsLCCallbacks & { element: HTMLElement }} elementsCallbacks
- *  * @typedef {(isAtInitialization:boolean)=>Promise<void>} effectCallback
- *  * @typedef {Object} elementsLCCallbacks
- *  * @property {(onViewCallbacksOptions: onViewPortHandler) => Promise<void>} onViewCallback
- *  * @property {(onViewCallbacksOptions: onViewPortHandler) => Promise<void>} onExitViewCallback
- *  * @property {mrefOptions["onDisconnected"][]} lifecyclesOnDisconnected
- *  * @typedef {(options:{attributeName:string, newValue:string})=>Promise<void>} attributeChangedLifecycle
- *  * @typedef {Object} mrefOptions
- *  * @property {HTMLElement} element
- *  * @property {boolean} isConnected
- *  * @property {(strings:TemplateStringsArray,...values:string[])=>void} html
- *  * - control innerHTML using `templateLiteral`
- *  * @property {(arg0:attributeChangedLifecycle)=>void} onAttributeChanged
- *  * @property {(arg0:()=>Promise<void>)=>void} onDisconnected
- *  * @property {(elementsCallbacks:elementsLCCallbacks)=>onViewPortInstance} onViewPort
- *  * @property {(effect:effectCallback)=>{effect:effectCallback}} $
- *  * - effect to monitor data changes;
- *  * @property {(relativePath:string)=>Promise<signalRef_|false>} signalRef
- *  * @typedef {(mrefOptions:mrefOptions)=>Promise<void>} vorth
- *  * @type {vorth}
- *  *[blank]/
- *	export default async ( { ...options } )=>{
- *		// replace ...option with properties that you need;
+ * * @typedef {(...args:any)=>Promise<any>} importedLib
+ * * @typedef {Record<string, any>|Array|string|number|boolean} returnOfSignal
+ * * @typedef {{value:returnOfSignal,call$:()=>void,remove$:(effect:{effect:()=>void})=>void}} signalRef_
+ * * @typedef {Object} onViewPortInstance
+ * * @property {() => Promise<void>} disconnect
+ * * @property {(element: Element | HTMLElement) => onViewPortHandler} handlers
+ * * @typedef {Object} onViewPortHandler
+ * * @property {()=>void} removeOnExitViewCallback
+ * * @property {()=>void} removeOnViewCallback
+ * * @property {()=>void} unobserveElement
+ * * @typedef {(isAtInitialization:boolean)=>Promise<void>} effectCallback
+ * * @typedef {Object} elementsLCCallbacks
+ * * @property {(onViewCallbacksOptions: onViewPortHandler) => Promise<void>} onViewCallback
+ * * @property {(onViewCallbacksOptions: onViewPortHandler) => Promise<void>} onExitViewCallback
+ * * @property {mrefOptions["onDisconnected"][]} lifecyclesOnDisconnected
+ * * @typedef {Object} mrefOptions
+ * * @property {HTMLElement} element
+ * * @property {boolean} isConnected
+ * * @property {(strings:TemplateStringsArray,...values:string[])=>void} html
+ * * - control innerHTML using `templateLiteral`;
+ * * @property {(arg0:(options:{attributeName:string, newValue:string})=>Promise<void>)=>void} onAttributeChanged
+ * * @property {(arg0:()=>Promise<void>)=>void} onDisconnected
+ * * @property {(elementsCallbacks:elementsLCCallbacks)=>onViewPortInstance} onViewPort
+ * * @property {(effect:effectCallback)=>{effect:effectCallback}} $
+ * * - to create `effect` on data changes;
+ * * @property {(relativePath:string)=>Promise<signalRef_|false>} importData
+ * * @property {(relativePath:string)=>Promise<importedLib|false>} importLib
+ * * @property {(options:{dataOnly:returnOfSignal}|{attributeName:string, data:returnOfSignal})=>signalRef_|false} let_
+ * * @property {(options:{dataOnly:()=>Promise<returnOfSignal>}|{attributeName:string, data:()=>Promise<returnOfSignal>})=>signalRef_|false} derived
+ * * @property {string} loopedAttrName
+ * * @property {()=>{[key:string]:string}} parsedLoopedAttr
+ * * @property {(options:{signal:signalRef_, childLifescyclePath:string, afterLoopCallback?:()=>Promise<void>,element?:HTMLElement})=>void} for_
+ * * @typedef {(mrefOptions:mrefOptions)=>Promise<void>} vorthLifecycle
+ * *[blank]/
+ * /** [blank]@type {vorthLifecycle} *[blank]/
+ *	export default async ( { ...options /** replace ...option with properties that you need;  *[blank]/ } )=>{
  *		// your js code;
  *	}
  * ```
+ * > - for `onDisconnected` `event`, there's no need for manual clean-up on `let_` and `derived`, as both are automatically `unRefed`, when this `event` is triggered;
+ * > - `for_`:
+ * > > - `element` if not filled will refer to current `lifecycle` `element`;
+ * > > - `signal` `value` `type` should be `{[key:string]:string}[]`;
  * > - `html` method can be called using html\`yourHMTLLiteral\`;
  * > - recommended to install `lit-plugin` in vs-code for syntax highlighting;
- * - for data layer, on the `/your/prefix/path/your/relative/path/signal.mjs`, export default of `any` type:
+ * > - in real `runtime` the path will be something like:
+ * > > - `/assets/js/modules/lifecycles/my_module.mjs`;
+ * > > - `/assets/js/modules/data/my_data.mjs`;
+ * - `vorthData`: for data layer, on the `/your/vort_root/path/data/your/relative/path/signal.mjs`(the `data/` is fixed path):
  * ```js
- * // optional mode
- * export const mode = 'session'; // 'local'|'session', default is false
- * // and one of example bellow
- * export default '';
- * // or
- * export default 0;
- * // or
- * export default [];
- * // or
- * export default { data: 'anything' };
- * // or
  * /**
- *  * @param {Promise<{value:any,call$:()=>void, remove$:()=>void}|false>} importData
- *  *[blank]/
- * export default async (importData) => {
- *  // must return with `any` type;
- * };
+ * * @typedef {{value:any,call$:()=>void,remove$:(effect:{effect:()=>void})=>void}} signalRef__
+ * * @typedef {{data:{let:Record<string, any>|Array|string|number|boolean},storeMode:false|'localStorage'|'sessionStorage'}|{data:{derived:((a0:{importData:(relativePath:string)=>Promise<signalRef__|false>,importLib:(relativePath:string)=>Promise<((...args:any)=>Promise<any>)|false>})=>Promise<Record<string, any>|Array|string|number|boolean>)}}} vorthData
+ * *[blank]/
+ * /** [blank]@type {vorthData} *[blank]/
+ * export default { storeMode: false, data: {...option} }
  * ```
  * > - which you can reference with `mrefOptions.signalRef` on the relative path it's pointing to;
- * > - in the `mrefOptions.$`, you can reference return value of `mrefOptions.signalRef`, to create `effects`, which is a `callback` that will be called everytime there's changes on the value of that `reference` called in the `$` `callback` parameter, unless it's nested value like array(using array modification method) or object, in wich you need to fire `call$` in the element lifecyle, unless you want to use reassignment syntax using spreading operator;
- * > - the destructured { value } returned `mrefOptions.signalRef`, can be reassigned to trigger changes, except the endpoint that are exporting function type;
- * > > - the function type is to tell `Vorth` that this is a `derived` `signal`, that are dependent on other `signal`;
- * ## documentation for signal
- * refer to [virst](https://www.npmjs.com/package/virst):
- * - [Let](https://www.npmjs.com/package/virst#let) for exported data;
- * - [Derived](https://www.npmjs.com/package/virst#derived) for derived function data;
- * - [$](https://www.npmjs.com/package/virst#$) for effect `$`;
+ * > - the destructured { value } returned from `mrefOptions.signalRef`, can be reassigned to trigger `changes`, except the endpoint that are `derived`;
+ * > - in the `mrefOptions.$`, you can reference return value of `mrefOptions.signalRef`, to create `effects`, which is a `callback` that will be called everytime there's `changes` on the value of that `reference` called in the `$` `callback` parameter, unless it's nested value like array(using array modification method) or object, in wich you need to fire `call$` in the element lifecyle, unless you want to use reassignment syntax using spreading operator;
+ * ```js
+ * // in vorthLifecycle scope
+ * const signal = let_([1,2,3]); // or from signalRef;
+ * signal.value.push(4);
+ * signal.call$();
+ * // will have the same effect of
+ * signal.value = [ ...signal.value, 1 ];
+ * // the spreading operator also works on object type
+ * // const signal = let_({ data1:'1', data2:'2' }); // or from signalRef;
+ * // signal.value = { ...signal.value, newKey:'value' };
+ * $(async (isAtInitialization) => {
+ *		const value = signal.value;
+ *		// if (isAtInitialization) {
+ *		//	return;
+ *		// } // uncomment this to stop any further signal autosubscribing bellow this point
+ *		console.console.log(value);
+ * });
+ * ```
+ * - `vorthLib`: for data layer, on the `/your/vort_root/path/libs/your/relative/path/lib.mjs`(the `libs/` is fixed path):
+ * ```js
+ * /**
+ * * @typedef {(...args:any)=>Promise<any>} vorthLib
+ * *[blank]/
+ * /** @type {vorthLib} *[blank]/
+ * export default async () => {
+ * 	// js code
+ * }
+ * ```
+ * > - which you can use by using `importLib` on multiple `lifecycle` or `derived` `data`;
  */
 export class Vorth {
     /**
@@ -92,19 +109,28 @@ export class Vorth {
     static __: Vorth;
     /**
      * @private
+     * @returns {void}
+     */
+    private setDate;
+    /**
      * @type {string}
      */
-    private cacheDate;
+    cacheDate: string;
     /**
      * @private
-     * @type {Map<string, vorth>}
+     * @type {Map<string, vorthLifecycle>}
      */
     private chacedRef;
     /**
      * @private
-     * @type {Map<string, [Let<any>, 'local'|'session'|false]>}
+     * @type {Map<string, vorthData & {signal:Derived|Let}>}
      */
     private cachedLet;
+    /**
+     * @private
+     * @type {Map<string, importedLib>}
+     */
+    private cachedLib;
     /**
      * @private
      * @returns {void}
@@ -118,7 +144,7 @@ export class Vorth {
     /**
      * @private
      * @param {string} importPath
-     * @returns {Promise<vorth|false>}
+     * @returns {Promise<vorthLifecycle|false>}
      */
     private importVorth;
     /**
@@ -126,24 +152,51 @@ export class Vorth {
      * @param {string} relativePath
      * @returns {string}
      */
-    private storagePath;
+    private storageKey;
+    /**
+     * @private
+     * @param {string} relativePath
+     */
+    private importLib;
     /**
      * @private
      * @param {string} relativePath
      * @returns {Promise<signalRef_|false>}
      */
-    private signalRef;
+    private importData;
+    /**
+     * @private
+     */
+    private loopedAttr;
+    /**
+     * @private
+     * @param {Object} a0
+     * @param {HTMLElement} a0.element
+     * @param {signalRef_} a0.signal
+     * @param {string} a0.childLifescyclePath
+     * @param {()=>Promise<void>} [a0.afterLoopCallback]
+     * @returns {void}
+     */
+    private for;
     /**
      * @private
      * @return {void}
      */
-    private mRefLifecycle;
+    private vorthLifecycle;
 }
 /**
  * *
  */
+export type importedLib = (...args: any) => Promise<any>;
+/**
+ * *
+ */
+export type returnOfSignal = Record<string, any> | any[] | string | number | boolean;
+/**
+ * *
+ */
 export type signalRef_ = {
-    value: any;
+    value: returnOfSignal;
     call$: () => void;
     remove$: (effect: {
         effect: () => void;
@@ -154,11 +207,11 @@ export type signalRef_ = {
  */
 export type onViewPortInstance = {
     /**
-     *  *
+     * *
      */
     disconnect: () => Promise<void>;
     /**
-     *  *
+     * *
      */
     handlers: (element: Element | HTMLElement) => onViewPortHandler;
 };
@@ -167,23 +220,17 @@ export type onViewPortInstance = {
  */
 export type onViewPortHandler = {
     /**
-     *  *
+     * *
      */
     removeOnExitViewCallback: () => void;
     /**
-     *  *
+     * *
      */
     removeOnViewCallback: () => void;
     /**
-     *  *
+     * *
      */
     unobserveElement: () => void;
-};
-/**
- * *
- */
-export type elementsCallbacks = elementsLCCallbacks & {
-    element: HTMLElement;
 };
 /**
  * *
@@ -194,67 +241,181 @@ export type effectCallback = (isAtInitialization: boolean) => Promise<void>;
  */
 export type elementsLCCallbacks = {
     /**
-     *  *
+     * *
      */
     onViewCallback: (onViewCallbacksOptions: onViewPortHandler) => Promise<void>;
     /**
-     *  *
+     * *
      */
     onExitViewCallback: (onViewCallbacksOptions: onViewPortHandler) => Promise<void>;
     /**
-     *  *
+     * *
      */
     lifecyclesOnDisconnected: mrefOptions["onDisconnected"][];
 };
 /**
  * *
  */
-export type attributeChangedLifecycle = (options: {
-    attributeName: string;
-    newValue: string;
-}) => Promise<void>;
-/**
- * *
- */
 export type mrefOptions = {
     /**
-     *  *
+     * *
      */
     element: HTMLElement;
     /**
-     *  *
+     * *
      */
     isConnected: boolean;
     /**
-     *  * - control innerHTML using `templateLiteral`
-     *  *
+     * * - control innerHTML using `templateLiteral`;
+     * *
      */
     html: (strings: TemplateStringsArray, ...values: string[]) => void;
     /**
-     *  *
+     * *
      */
-    onAttributeChanged: (arg0: attributeChangedLifecycle) => void;
+    onAttributeChanged: (arg0: (options: {
+        attributeName: string;
+        newValue: string;
+    }) => Promise<void>) => void;
     /**
-     *  *
+     * *
      */
     onDisconnected: (arg0: () => Promise<void>) => void;
     /**
-     *  *
+     * *
      */
     onViewPort: (elementsCallbacks: elementsLCCallbacks) => onViewPortInstance;
     /**
-     *  * - effect to monitor data changes;
-     *  *
+     * * - to create `effect` on data changes;
+     * *
      */
     $: (effect: effectCallback) => {
         effect: effectCallback;
     };
     /**
-     *  *
+     * *
      */
-    signalRef: (relativePath: string) => Promise<signalRef_ | false>;
+    importData: (relativePath: string) => Promise<signalRef_ | false>;
+    /**
+     * *
+     */
+    importLib: (relativePath: string) => Promise<importedLib | false>;
+    /**
+     * *
+     */
+    let_: (options: {
+        dataOnly: returnOfSignal;
+    } | {
+        attributeName: string;
+        data: returnOfSignal;
+    }) => signalRef_ | false;
+    /**
+     * *
+     */
+    derived: (options: {
+        dataOnly: () => Promise<returnOfSignal>;
+    } | {
+        attributeName: string;
+        data: () => Promise<returnOfSignal>;
+    }) => signalRef_ | false;
+    /**
+     * *
+     */
+    loopedAttrName: string;
+    /**
+     * *
+     */
+    parsedLoopedAttr: () => {
+        [key: string]: string;
+    };
+    /**
+     * *
+     */
+    for_: (options: {
+        signal: signalRef_;
+        childLifescyclePath: string;
+        afterLoopCallback?: () => Promise<void>;
+        element?: HTMLElement;
+    }) => void;
 };
+/**
+ * *[blank]/
+ * /** [blank]@type {vorthLifecycle} *[blank]/
+ * export default async ( { ...options /** replace ...option with properties that you need;  *[blank]/ } )=>{
+ * // your js code;
+ * }
+ * ```
+ * > - for `onDisconnected` `event`, there's no need for manual clean-up on `let_` and `derived`, as both are automatically `unRefed`, when this `event` is triggered;
+ * > - `for_`:
+ * > > - `element` if not filled will refer to current `lifecycle` `element`;
+ * > > - `signal` `value` `type` should be `{[key:string]:string}[]`;
+ * > - `html` method can be called using html\`yourHMTLLiteral\`;
+ * > - recommended to install `lit-plugin` in vs-code for syntax highlighting;
+ * > - in real `runtime` the path will be something like:
+ * > > - `/assets/js/modules/lifecycles/my_module.mjs`;
+ * > > - `/assets/js/modules/data/my_data.mjs`;
+ * - `vorthData`: for data layer, on the `/your/vort_root/path/data/your/relative/path/signal.mjs`(the `data/` is fixed path):
+ * ```js
+ * /**
+ * *
+ */
+export type vorthLifecycle = (mrefOptions: mrefOptions) => Promise<void>;
 /**
  * *
  */
-export type vorth = (mrefOptions: mrefOptions) => Promise<void>;
+export type signalRef__ = {
+    value: any;
+    call$: () => void;
+    remove$: (effect: {
+        effect: () => void;
+    }) => void;
+};
+/**
+ * *[blank]/
+ * /** [blank]@type {vorthData} *[blank]/
+ * export default { storeMode: false, data: {...option} }
+ * ```
+ * > - which you can reference with `mrefOptions.signalRef` on the relative path it's pointing to;
+ * > - the destructured { value } returned from `mrefOptions.signalRef`, can be reassigned to trigger `changes`, except the endpoint that are `derived`;
+ * > - in the `mrefOptions.$`, you can reference return value of `mrefOptions.signalRef`, to create `effects`, which is a `callback` that will be called everytime there's `changes` on the value of that `reference` called in the `$` `callback` parameter, unless it's nested value like array(using array modification method) or object, in wich you need to fire `call$` in the element lifecyle, unless you want to use reassignment syntax using spreading operator;
+ * ```js
+ * // in vorthLifecycle scope
+ * const signal = let_([1,2,3]); // or from signalRef;
+ * signal.value.push(4);
+ * signal.call$();
+ * // will have the same effect of
+ * signal.value = [ ...signal.value, 1 ];
+ * // the spreading operator also works on object type
+ * // const signal = let_({ data1:'1', data2:'2' }); // or from signalRef;
+ * // signal.value = { ...signal.value, newKey:'value' };
+ * $(async (isAtInitialization) => {
+ * const value = signal.value;
+ * // if (isAtInitialization) {
+ * //	return;
+ * // } // uncomment this to stop any further signal autosubscribing bellow this point
+ * console.console.log(value);
+ * });
+ * ```
+ * - `vorthLib`: for data layer, on the `/your/vort_root/path/libs/your/relative/path/lib.mjs`(the `libs/` is fixed path):
+ * ```js
+ * /**
+ * *
+ */
+export type vorthData = {
+    data: {
+        let: Record<string, any> | any[] | string | number | boolean;
+    };
+    storeMode: false | "localStorage" | "sessionStorage";
+} | {
+    data: {
+        derived: ((a0: {
+            importData: (relativePath: string) => Promise<signalRef__ | false>;
+            importLib: (relativePath: string) => Promise<((...args: any) => Promise<any>) | false>;
+        }) => Promise<Record<string, any> | any[] | string | number | boolean>);
+    };
+};
+/**
+ * *[blank]/
+ * /**
+ */
+export type vorthLib = (...args: any) => Promise<any>;
