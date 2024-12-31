@@ -5,10 +5,11 @@
 		"emitDeclarationOnly": true,
 		"outDir": "./types",
 		"module": "ESNext",
-		"target": "ES2020",
+		"target": "ESNext",
 		"moduleResolution": "node",
 		"esModuleInterop": true,
-		"skipLibCheck": true
+		"skipLibCheck": true,
+		"allowSyntheticDefaultImports": true
 	},
 	"include": ["./index.mjs"]
 }
