@@ -8,19 +8,41 @@ import { _QueueFIFO, _QueueObjectFIFO } from '@html_first/simple_queue';
 
 /**
  * @description
- * - for developer who want to use package managers, you can instantiate this class to monitor directory;
+ * for developer who want to use package managers:
+ * - download the `prebundled.mjs`, and load it on your html:
+ * ```html
+ * <script type="module" src="/target/path/prebundled.mjs"></script>
+ * ```
+ * - you can instantiate this class to monitor directory;
+ * ```js
+ * // /dev/vorth.mjs
+ * // @ts-check
+ * import { __vorthApp } from 'vorth/src/__vorthApp.mjs'; // the main `vorth` got poluted with `Vorth` which refer to browser window;
+ * new __vorthApp('source/path', 'target/path');
+ * ```
  * - inside `source/path` do this:
  * > - place downloaded `./prebundled.mjs`;
  * > - create dir:
  * > > - `./lifecycles`;
  * > > - `./data`;
  * > > - `./libs`;
- * ```js
- * // @ts-check
- * import { __vorthApp } from 'vorth/src/__vorthApp.mjs'; // the main `vorth` got poluted with `Vorth` which refer to browser window;
- * new __vorthApp('source/path', 'target/path');
+ * - add runner script to `package.json` `script`;
+ * ```json
+ * {
+ * 	...
+ * 	"scripts":{
+ * 		...
+ * 		"myscript" : "node ./dev/vorth.mjs",
+ * 		...
+ * 	},
+ * 	...
+ * }
  * ```
- * - then instead of copy pasting type helper from this README.md you can use exported type of `vorth` for the respective `modules`;
+ * - run by calling `myscript` on terminal using packageManager;
+ * ```bash
+ * npm run myscript;
+ * ```
+ * - instead of copy pasting type helper from this README.md you can use exported type of `vorth` for the respective `modules`;
  * ```ts
  * // typescript
  * import type { vorthData, vorthLib, vorthLifecycle } from 'vorth';
