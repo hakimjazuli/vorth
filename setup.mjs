@@ -12,16 +12,16 @@ class setup {
 	static vsCodeSnippets = path.join(setup.__dirname, setup.vscode);
 	static targetDir = process.env.INIT_CWD || process.cwd();
 	static srcDefaultFolders = ['data', 'workers', 'libs', 'lifecycles'];
-	static run = () => {
+	static run = async () => {
 		try {
 			const srcDefaultFolders = setup.srcDefaultFolders;
 			for (let i = 0; i < srcDefaultFolders.length; i++) {
-				fs.mkdir(path.join(setup.targetDir, 'src', srcDefaultFolders[i]), {
+				await fs.mkdir(path.join(setup.targetDir, 'src', srcDefaultFolders[i]), {
 					recursive: true,
 				});
 			}
-			setup.copyFiles(setup.sourceDir, setup.targetDir);
-			setup.copyFiles(setup.vsCodeSnippets, path.join(setup.targetDir, setup.vscode));
+			await setup.copyFiles(setup.sourceDir, setup.targetDir);
+			await setup.copyFiles(setup.vsCodeSnippets, path.join(setup.targetDir, setup.vscode));
 			console.log('✅ Starter project setup complete!');
 		} catch (err) {
 			console.error('❌ Error setting up project:', err);
