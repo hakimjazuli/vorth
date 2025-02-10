@@ -1,350 +1,260 @@
 // @ts-check
 
-import { $, Derived, Let, Lifecycle, Ping } from 'virst';
+import { $, Derived, Let, Lifecycle, Ping, Q, WorkerMainThread, helper, onViewPort } from 'virst';
+import { lifecycleAttr } from 'vorth/src/lifecycles/lifecyclesList.mjs';
+import { importLib } from './libs/importLib.mjs';
+import { importData } from './data/importData.mjs';
+import { importWorker } from './workers/importWorker.mjs';
+import { select } from './lifecycles/select.mjs';
+import { on } from './lifecycles/on.mjs';
 
 /**
+ * @typedef {{}|null|number|string|boolean|symbol|bigint|function} anyButNull
+ * @typedef {'vorth'} VorthNamespace
+ */
+/**
  * @description
- * how to use:
- * - download the `prebundled.mjs`, and load it on your html:
- * ```html
- * <script type="module" src="/your/vort_root/path/prebundled.mjs"></script>
- * ```
- * - add `vorth` and `your/relative/path/module` as `attribute` on the element:
- * ```html
- * <div vorth="your/relative/path/module"></div>
- * ```
- * - `vorthLifecycle`: paste this type helper on `/your/vort_root/path/lifecycles/your/relative/path/module.mjs`(the `lifecycles/` is fixed path):
- * ```js
- * /**
- * * @typedef {(...args:any)=>Promise<any>} importedLib
- * * @typedef {Record<string, any>|Array|string|number|boolean} returnOfSignal
- * * @typedef {{value:returnOfSignal,call$:()=>void,remove$:(effect:{effect:()=>void})=>void}} signalRef_
- * * @typedef {Object} onViewPortInstance
- * * @property {() => Promise<void>} disconnect
- * * @property {(element: Element | HTMLElement) => onViewPortHandler} handlers
- * * @typedef {Object} onViewPortHandler
- * * @property {()=>void} removeOnExitViewCallback
- * * @property {()=>void} removeOnViewCallback
- * * @property {()=>void} unobserveElement
- * * @typedef {(isAtInitialization:boolean)=>Promise<void>} effectCallback
- * * @typedef {Object} elementsLCCallbacks
- * * @property {(onViewCallbacksOptions: onViewPortHandler) => Promise<void>} onViewCallback
- * * @property {(onViewCallbacksOptions: onViewPortHandler) => Promise<void>} onExitViewCallback
- * * @property {mrefOptions["onDisconnected"][]} lifecyclesOnDisconnected
- * * @typedef {Object} mrefOptions
- * * @property {HTMLElement} element
- * * @property {boolean} isConnected
- * * @property {(strings:TemplateStringsArray,...values:string[])=>void} html
- * * - control innerHTML using `templateLiteral`;
- * * @property {(arg0:(options:{attributeName:string, newValue:string})=>Promise<void>)=>void} onAttributeChanged
- * * @property {(arg0:()=>Promise<void>)=>void} onDisconnected
- * * @property {(elementsCallbacks:elementsLCCallbacks)=>onViewPortInstance} onViewPort
- * * @property {(effect:effectCallback)=>{effect:effectCallback}} $
- * * - to create `effect` on data changes;
- * * @property {(relativePath:string)=>Promise<signalRef_|false>} importData
- * * @property {(relativePath:string)=>Promise<importedLib|false>} importLib
- * * @property {(options:{dataOnly:returnOfSignal}|{attributeName:string, data:returnOfSignal})=>signalRef_|false} let_
- * * @property {(options:{dataOnly:()=>Promise<returnOfSignal>}|{attributeName:string, data:()=>Promise<returnOfSignal>})=>signalRef_|false} derived
- * * @property {string} loopedAttrName
- * * @property {()=>{[key:string]:string}} parsedLoopedAttr
- * * @property {(options:{signal:signalRef_, childLifescyclePath:string, afterLoopCallback?:()=>Promise<void>,element?:HTMLElement})=>void} for_
- * * @typedef {(mrefOptions:mrefOptions)=>Promise<void>} vorthLifecycle
- * *[blank]/
- * /** [blank]@type {vorthLifecycle} *[blank]/
- *	export default async ( { ...options /** replace ...option with properties that you need;  *[blank]/ } )=>{
- *		// your js code;
- *	}
- * ```
- * > - for `onDisconnected` `event`, there's no need for manual clean-up on `let_` and `derived`, as both are automatically `unRefed`, when this `event` is triggered;
- * > - `for_`:
- * > > - `element` if not filled will refer to current `lifecycle` `element`;
- * > > - `signal` `value` `type` should be `{[key:string]:string}[]`;
- * > - `html` method can be called using html\`yourHMTLLiteral\`;
- * > - recommended to install `lit-plugin` in vs-code for syntax highlighting;
- * > - in real `runtime` the path will be something like:
- * > > - `/assets/js/modules/lifecycles/my_module.mjs`;
- * > > - `/assets/js/modules/data/my_data.mjs`;
- * - `vorthData`: for data layer, on the `/your/vort_root/path/data/your/relative/path/signal.mjs`(the `data/` is fixed path):
- * ```js
- * /**
- * * @typedef {{value:any,call$:()=>void,remove$:(effect:{effect:()=>void})=>void}} signalRef__
- * * @typedef {{data:{let:Record<string, any>|Array|string|number|boolean},storeMode:false|'localStorage'|'sessionStorage'}|{data:{derived:((a0:{importData:(relativePath:string)=>Promise<signalRef__|false>,importLib:(relativePath:string)=>Promise<((...args:any)=>Promise<any>)|false>})=>Promise<Record<string, any>|Array|string|number|boolean>)}}} vorthData
- * *[blank]/
- * /** [blank]@type {vorthData} *[blank]/
- * export default { storeMode: false, data: {...option} }
- * ```
- * > - which you can reference with `mrefOptions.signalRef` on the relative path it's pointing to;
- * > - the destructured { value } returned from `mrefOptions.signalRef`, can be reassigned to trigger `changes`, except the endpoint that are `derived`;
- * > - in the `mrefOptions.$`, you can reference return value of `mrefOptions.signalRef`, to create `effects`, which is a `callback` that will be called everytime there's `changes` on the value of that `reference` called in the `$` `callback` parameter, unless it's nested value like array(using array modification method) or object, in wich you need to fire `call$` in the element lifecyle, unless you want to use reassignment syntax using spreading operator;
- * ```js
- * // in vorthLifecycle scope
- * const signal = let_([1,2,3]); // or from signalRef;
- * signal.value.push(4);
- * signal.call$();
- * // will have the same effect of
- * signal.value = [ ...signal.value, 1 ];
- * // the spreading operator also works on object type
- * // const signal = let_({ data1:'1', data2:'2' }); // or from signalRef;
- * // signal.value = { ...signal.value, newKey:'value' };
- * $(async (isAtInitialization) => {
- *		const value = signal.value;
- *		// if (isAtInitialization) {
- *		//	return;
- *		// } // uncomment this to stop any further signal autosubscribing bellow this point
- *		console.console.log(value);
- * });
- * ```
- * - `vorthLib`: for data layer, on the `/your/vort_root/path/libs/your/relative/path/lib.mjs`(the `libs/` is fixed path):
- * ```js
- * /**
- * * @typedef {(...args:any)=>Promise<any>} vorthLib
- * *[blank]/
- * /** @type {vorthLib} *[blank]/
- * export default async () => {
- * 	// js code
- * }
- * ```
- * > - which you can use by using `importLib` on multiple `lifecycle` or `derived` `data`;
  */
 export class Vorth {
-	/**
-	 * @type {Vorth}
-	 */
-	static __;
-	constructor() {
-		if (Vorth.__ instanceof Vorth) {
-			return;
-		}
-		Vorth.__ = this;
-		this.setDate();
-		this.setBase();
-		this.vorthLifecycle();
-	}
+	static namespace = 'vorth';
 	/**
 	 * @private
-	 * @returns {void}
+	 * custom `HTMLelement` attribute imediately run lifecycle as soon as connected to the dom,
+	 * without this, `vorth` will wait until crossing viewPort to run it;
 	 */
-	setDate = () => {
-		const key = 'vorth-now';
-		let now = sessionStorage.getItem(key);
-		if (now) {
-			this.cacheDate = now;
-			return;
-		}
-		now = `?t=${Date.now()}`;
-		sessionStorage.setItem(key, now);
-		this.cacheDate = now;
-		return;
+	static pre = 'pre';
+	/**
+	 * @type {number}
+	 */
+	static versionMin = 0;
+	/**
+	 * @private
+	 * @type {Record<string, {value:any, onCompare?:(newValue:any)=>void}>}
+	 */
+	static properties_ = {
+		batch: { value: onViewPort.loadCount },
+		versionMin: {
+			value: Vorth.versionMin,
+			onCompare: (minValue) => {
+				if (minValue < JSON.parse(Vorth.cacheDate)) {
+					return;
+				}
+				setTimeout(() => {
+					Vorth.cacheDate = JSON.stringify(Date.now());
+					location.reload();
+				}, 10_000);
+			},
+		},
 	};
+	/**
+	 * @private
+	 * @type {()=>void}
+	 */
+	static assignProperties = () => {
+		const namespace = Vorth.namespace;
+		new Lifecycle({
+			attr: 'property',
+			documentScope: window.document,
+			onConnected: async ({ element, onAttributeChanged }) => {
+				const handler = async () => {
+					const thisProperties_ = Vorth.properties_;
+					for (const property in thisProperties_) {
+						const propertyName = `${namespace}-${property}`;
+						if (
+							!(element instanceof HTMLMetaElement) ||
+							!element.hasAttribute('property') ||
+							!element.hasAttribute('content') ||
+							element.getAttribute('property') !== propertyName
+						) {
+							continue;
+						}
+						const value = element.getAttribute('content') ?? '';
+						if (!value) {
+							continue;
+						}
+						try {
+							const data = thisProperties_[property];
+							data.value = JSON.parse(value);
+							if (data.onCompare) {
+								data.onCompare(value);
+							}
+						} catch (error) {
+							console.error({
+								error,
+								value,
+								propertyName,
+								message: 'somethings wrong while parsing and assigning vorth argument;',
+								elementString: element.outerHTML,
+							});
+						}
+					}
+				};
+				onAttributeChanged(handler);
+				handler();
+			},
+		});
+	};
+	static cacheDateName = `${Vorth.namespace}_now`;
+	/**
+	 * @private
+	 * @type {string}
+	 */
+	static cacheDate_;
+	/**
+	 * @private
+	 * @param {string} newValue
+	 */
+	static set cacheDate(newValue) {
+		Vorth.cacheDate_ = newValue;
+		const key = Vorth.cacheDateName;
+		sessionStorage.setItem(key, newValue);
+	}
 	/**
 	 * @type {string}
 	 */
-	cacheDate;
-	/**
-	 * @private
-	 * @type {Map<string, vorthLifecycle>}
-	 */
-	chacedRef = new Map();
-	/**
-	 * @private
-	 * @type {Map<string, vorthData & {signal:Derived|Let}>}
-	 */
-	cachedLet = new Map();
-	/**
-	 * @private
-	 * @type {Map<string, importedLib>}
-	 */
-	cachedLib = new Map();
-	/**
-	 * @private
-	 * @returns {void}
-	 */
-	setBase = () => {
-		this.base = new URL('./', import.meta.url).href;
-	};
-	/**
-	 * @private
-	 * @param {string} importPath
-	 * @returns {Promise<vorthLifecycle|false>}
-	 */
-	importVorth = async (importPath) => {
-		const ref = this.chacedRef.get(importPath);
-		if (ref) {
-			return ref;
+	static get cacheDate() {
+		if (Vorth.cacheDate_) {
+			return Vorth.cacheDate_;
 		}
-		const endpoint = `${this.base}lifecycles/${importPath}.mjs`;
+		const key = Vorth.cacheDateName;
+		let now = sessionStorage.getItem(key);
+		if (now) {
+			/**
+			 * to not trigger `sessionStorage.setItem` call;
+			 */
+			Vorth.cacheDate_ = now;
+			return now;
+		}
+		now = JSON.stringify(Date.now());
+		Vorth.cacheDate = now;
+		return now;
+	}
+	/**
+	 * @type {Map<string, [Let, WorkerMainThread["postMessage"]]>}
+	 */
+	static cachedWorker = new Map();
+	/**
+	 * @type {Map<string, Derived|Let>}
+	 */
+	static cachedLet = new Map();
+	/**
+	 * @param {string} importPath
+	 * @returns {Promise<import('./lifecycles/vorthLifecycle.mjs').vorthLifecycle|false>}
+	 */
+	static importLifecycle = async (importPath) => {
+		const endpoint = `${Vorth.pathLifecycles}${importPath}.mjs`;
 		try {
-			const newRef = (await import(`${endpoint}${this.cacheDate}`)).default;
-			this.chacedRef.set(importPath, newRef);
-			return newRef;
+			const importedLifecycle = await import(
+				`${endpoint}?${Vorth.cacheDateName}=${Vorth.cacheDate}`
+			);
+			if (!('lifecycle' in importedLifecycle)) {
+				throw Error('no_lifecycle');
+			}
+			return importedLifecycle.lifecycle;
 		} catch (error) {
-			console.error({
-				endpoint,
-				code: 404,
-				error: 'not found',
-				message: 'vorth="module-path" pointing to invalid endpoint',
-			});
+			if (error.message === 'no_lifecycle') {
+				console.error({
+					endpoint,
+					message:
+						'vorth="endpoint" point to a valid `endpoint`, but the `endpoint` have no named export as `lifecycle`',
+					error,
+				});
+			} else {
+				console.error({
+					endpoint,
+					404: 'not found',
+					message: 'vorth="module-path" pointing to invalid endpoint',
+					error,
+				});
+			}
 			return false;
 		}
 	};
 	/**
-	 * @private
 	 * @type {string}
 	 */
-	base = '/';
+	static base = '/';
 	/**
-	 * @private
 	 * @param {string} relativePath
 	 * @returns {string}
 	 */
-	storageKey = (relativePath) => `vorth-s-${relativePath}`;
+	static storageKey = (relativePath) => `vorth-data-${relativePath}`;
 	/**
-	 * @private
-	 * @param {string} relativePath
+	 * @param {import('vorth/src/data/dataList.mjs').dataList} relativePath
+	 * @param {vorthLifecycleOptions} [vorthLifecycleOptions]
+	 * - auto filled by Vorth, keep it unfilled!!!;
+	 * @returns {Promise<Let|false>}
 	 */
-	importLib = async (relativePath) => {
-		const lib = this.cachedLib.get(relativePath);
-		if (lib) {
-			return lib;
-		}
-		const endpoint = `${this.base}libs/${relativePath}.mjs`;
-		try {
-			const fn = (await import(`${endpoint}${this.cacheDate}`)).default;
-			this.cachedLib.set(relativePath, fn);
-			return fn;
-		} catch (error) {
-			console.error({
-				endpoint,
-				code: 404,
-				error: 'not found',
-				message: 'importLib pointing to invalid endpoint',
-			});
-			return false;
-		}
-	};
-	/**
-	 * @private
-	 * @param {string} relativePath
-	 * @returns {Promise<signalRef_|false>}
-	 */
-	importData = async (relativePath) => {
-		const signal_ = this.cachedLet.get(relativePath);
-		if (signal_) {
+	static importData = async (relativePath, vorthLifecycleOptions) =>
+		await importData(
 			// @ts-ignore
-			return signal_.signal;
-		}
-		const endpoint = `${this.base}data/${relativePath}.mjs`;
-		try {
-			/**
-			 * @type {vorthData}
-			 */
-			const newRef = (await import(`${endpoint}${this.cacheDate}`)).default;
-			if (!('data' in newRef)) {
-				throw Error('no_data');
-			}
-			if ('storeMode' in newRef) {
-				const storageKey = this.storageKey(relativePath);
-				const { data, storeMode } = newRef;
-				let checkValue = data.let;
-				if (storeMode === 'localStorage') {
-					const realValue = localStorage.getItem(storageKey);
-					if (realValue) {
-						checkValue = JSON.parse(realValue);
-					}
-				} else if (storeMode === 'sessionStorage') {
-					const realValue = sessionStorage.getItem(storageKey);
-					if (realValue) {
-						checkValue = JSON.parse(realValue);
-					}
-				}
-				const signal = new Let(checkValue);
-				this.cachedLet.set(relativePath, { data, storeMode, signal });
-				if (storeMode === 'localStorage') {
-					new $(async () => {
-						localStorage.setItem(storageKey, JSON.stringify(signal.value));
-					});
-				} else if (storeMode === 'sessionStorage') {
-					new $(async () => {
-						sessionStorage.setItem(storageKey, JSON.stringify(signal.value));
-					});
-				}
-				// @ts-ignore
-				return signal;
-			} else {
-				const { data } = newRef;
-				const signal = new Derived(async () => {
-					return await data.derived({
-						importData: this.importData,
-						importLib: this.importLib,
-					});
-				});
-				this.cachedLet.set(relativePath, { data, signal });
-				// @ts-ignore
-				return signal;
-			}
-		} catch (error) {
-			if (error === 'no_data') {
-				console.error({
-					endpoint,
-					error: 'no data',
-					message:
-						'signalRef point to a valid endpoint, but badly formed, default export must have `data` property',
-				});
-			} else {
-				console.error({
-					endpoint,
-					code: 404,
-					error: 'not found',
-					message: 'signalRef pointing to invalid endpoint',
-				});
-			}
-			return false;
-		}
-	};
+			relativePath,
+			vorthLifecycleOptions
+		);
 	/**
-	 * @private
-	 */
-	loopedAttr = 'vorth-loop';
-	/**
-	 * @private
 	 * @param {Object} a0
-	 * @param {HTMLElement} a0.element
-	 * @param {signalRef_} a0.signal
-	 * @param {string} a0.childLifescyclePath
+	 * @param {import('vorth/src/data/dataList.mjs').dataList} a0.dataName
+	 * - Let<Array<{[key:string]:string}>>;
+	 * @param {import('vorth/src/lifecycles/lifecyclesList.mjs').lifecyclesList} a0.childLifescycle
+	 * - lifecycle for the `for_.as`;
+	 * @param {HTMLElement} [a0.element]
+	 * - if `undefined`, it will use this current lifecycle element;
+	 * @param {boolean} [a0.waitForOnViewToRender]
+	 * - default true: normal behaviour, children will wait the `OnViewPort` to render it;
+	 * - false: children will be rendered all at once;
 	 * @param {()=>Promise<void>} [a0.afterLoopCallback]
-	 * @returns {void}
+	 * - callback to be run when all children receives values from the signal, even if there are any children yet to be rendered;
+	 * - if `undefined`, it will use this current lifecycle element;
+	 * @param {vorthLifecycleOptions} [a0.vorth]
+	 * - auto filled by Vorth, keep it unfilled!!!;
+	 * @returns {Promise<void>}
 	 */
-	for = ({ element, signal, childLifescyclePath, afterLoopCallback }) => {
-		const child = element.firstElementChild.cloneNode(true);
+	static for = async ({
+		dataName,
+		childLifescycle,
+		element,
+		waitForOnViewToRender = true,
+		afterLoopCallback = undefined,
+		vorth = undefined,
+	}) => {
+		// @ts-expect-error
+		const child = element.firstElementChi;
+		// @ts-expect-error
+		ld.cloneNode(true);
 		if (!(child instanceof HTMLElement)) {
 			return;
 		}
 		element.innerHTML = '';
-		const loopedAttr = this.loopedAttr;
-		child.setAttribute(loopedAttr, '{}');
-		child.setAttribute('vorth', childLifescyclePath);
+		child.setAttribute(
+			Vorth.namespace,
+			waitForOnViewToRender ? `${childLifescycle};${Vorth.pre}` : childLifescycle
+		);
+		const signal = await importData(dataName, vorth);
 		new $(async () => {
 			const data_s = signal.value;
-			const children = element.childNodes;
-			let i = 0;
-			// @ts-ignore
-			for (let j = 0; j < data_s.length; j++) {
-				i++;
-				const data_ = data_s[j];
-				const childElement = children[j];
-				if (childElement && childElement instanceof HTMLElement) {
-					childElement.setAttribute(loopedAttr, JSON.stringify(data_));
-					continue;
+			const children = element.children;
+			const maxCount = Math.max(children.length, data_s.length);
+			for (let i = 0; i < maxCount; i++) {
+				const data_ = data_s[i];
+				const children_ = children[i];
+				if (data_) {
+					if (children_ instanceof HTMLElement && Vorth.looped.has(children_)) {
+						Vorth.looped.get(children_).signal.value = data_;
+						continue;
+					}
+					const templateElement = child.cloneNode(true);
+					if (!(templateElement instanceof HTMLElement)) {
+						continue;
+					}
+					Vorth.looped.set(templateElement, {
+						name: dataName,
+						index: i,
+						signal: new Let(data_),
+					});
+					element.append(templateElement);
+				} else if (children_) {
+					children_.remove();
 				}
-				const templateElement = child.cloneNode(true);
-				if (!(templateElement instanceof HTMLElement)) {
-					break;
-				}
-				templateElement.setAttribute(loopedAttr, JSON.stringify(data_));
-				element.append(templateElement);
-			}
-			for (let j = i; j < children.length; j++) {
-				children[j].remove();
 			}
 			if (!afterLoopCallback) {
 				return;
@@ -354,24 +264,200 @@ export class Vorth {
 	};
 	/**
 	 * @private
+	 * @type {Map<HTMLElement, {name:import('vorth/src/data/dataList.mjs').dataList, index: number,signal:Let<Record<string, string>>}>}
+	 */
+	static looped = new Map();
+	/**
+	 * to handle looped data from `for_`
+	 * @template {import('vorth/src/data/dataList.mjs').dataList} dataList
+	 * @param {dataList} [dataName]
+	 * - this pramater is purely for IDE typechecking, and won't affect the script in any ways;
+	 * @param {HTMLElement} [element]
+	 * - auto filled by Vorth, keep it unfilled!!!;
+	 * @param {Array<Let|false>} [signals]
+	 * - auto filled by Vorth, keep it unfilled!!!;
+	 * @returns {{index:number, value:Awaited<ReturnType<import('vorth/src/data/dataList.mjs').importData<dataList>>>["value"][0]}|false}
+	 */
+	static of = (dataName, element, signals) => {
+		const data_ = Vorth.looped.get(element);
+		signals.push(data_.signal);
+		return {
+			get value() {
+				return data_.signal.value;
+			},
+			set value(newValue) {
+				data_.signal.value = newValue;
+				data_.signal.call$();
+			},
+			get index() {
+				return data_.index;
+			},
+		};
+	};
+	/**
+	 * @param {(isAtInitialization:boolean)=>Promise<void>} effect
+	 * @param {Array<$>} effects
+	 * @returns {$}
+	 */
+	static $ = (effect, effects) => {
+		const effect_ = new $(effect);
+		effects.push(effect_);
+		return effect_;
+	};
+	/**
+	 * @template V
+	 * @param {{dataOnly:()=>Promise<V>}|{attr:string, data:()=>Promise<V>}} obj
+	 * @param {HTMLElement} [element]
+	 * @param {Array<Derived<V>|false>} [signals]
+	 * @returns {Derived<V>}
+	 */
+	static derived = (obj, element, signals) => {
+		/**
+		 * @type {Derived|false}
+		 */
+		let signal = false;
+		if ('dataOnly' in obj) {
+			signal = new Derived(obj.dataOnly);
+		} else {
+			const { attr, data } = obj;
+			signal = new Derived(data, attr, {
+				documentScope: element,
+			});
+			new $(async () => {
+				// @ts-expect-error
+				const value = signal.value;
+				if (!element.hasAttribute(attr)) {
+					return;
+				}
+				try {
+					Let.domReflector(
+						value,
+						attr,
+						element,
+						// @ts-expect-error
+						signal
+					);
+				} catch (error) {
+					console.error(error);
+				}
+			});
+		}
+		signals.push(signal);
+		return signal;
+	};
+	/**
+	 * @template V
+	 * @param {{dataOnly:V}|{attr:string, data:V}} obj
+	 * @param {HTMLElement} [element]
+	 * @param {Array<Let<V>|false>} [signals]
+	 * @returns {Let<V>}
+	 */
+	static let = (obj, element, signals) => {
+		/**
+		 * @type {Let|false}
+		 */
+		let signal = false;
+		if ('dataOnly' in obj) {
+			signal = new Let(obj.dataOnly);
+		} else {
+			const { attr, data } = obj;
+			signal = new Let(data, attr, {
+				documentScope: element,
+			});
+			new $(async () => {
+				// @ts-expect-error
+				const value = signal.value;
+				if (!element.hasAttribute(attr)) {
+					return;
+				}
+				try {
+					Let.domReflector(
+						value,
+						attr,
+						element,
+						// @ts-expect-error
+						signal
+					);
+				} catch (error) {
+					console.error(error);
+				}
+			});
+		}
+		signals.push(signal);
+		return signal;
+	};
+	/**
+	 * @private
+	 * @param {string} path_
+	 * @param {HTMLElement} element
+	 * @param {vorthLifecycleOptions["html"]} html
+	 * @param {vorthLifecycleOptions["onAttributeChanged"]} onAttributeChanged
+	 * @param {vorthLifecycleOptions["onDisconnected"]} onDisconnected
+	 * @param {vorthLifecycleOptions["onViewPort"]} onViewPort
+	 */
+	static lsCaller = (path_, element, html, onAttributeChanged, onDisconnected, onViewPort) => {
+		/**
+		 * @type {(Let<any>|false)[]}
+		 */
+		const signals = [];
+		/**
+		 * @type {($)[]}
+		 */
+		const effects = [];
+		Vorth.vorthLifecycle(
+			path_,
+			element,
+			html,
+			onAttributeChanged,
+			onDisconnected,
+			onViewPort,
+			effects,
+			signals
+		);
+		onDisconnected(async () => {
+			/**
+			 * allredy automatic feed trough `lifecyclesOnDisconnected`;
+			// removeOnViewCallback();
+			// removeOnExitViewCallback();
+			// unobserveElement();
+			*/
+			const maxLength = Math.max(effects.length, signals.length);
+			for (let i = 0; i < maxLength; i++) {
+				const signal = signals[i];
+				if (signal) {
+					signal.unRef();
+				}
+				const effect = effects[i];
+				if (effect) {
+					effect.remove$();
+				}
+			}
+			if (Vorth.looped.has(element)) {
+				Vorth.looped.delete(element);
+			}
+		});
+	};
+	/**
+	 * @private
 	 * @return {void}
 	 */
-	vorthLifecycle = () => {
-		const attributeName = 'vorth';
+	static assignLifecycle = () => {
+		const attributeName = Vorth.namespace;
 		new Lifecycle({
-			attributeName,
-			bypassNested: true,
-			documentScope: document,
-			onConnected: async ({
-				element,
-				html,
-				isConnected,
-				onAttributeChanged,
-				onDisconnected,
-				onViewPort,
-			}) => {
-				const path_ = element.getAttribute(attributeName);
-				if (!path_) {
+			attr: attributeName,
+			documentScope: window.document,
+			onConnected: async ({ element, html, onAttributeChanged, onDisconnected, onViewPort }) => {
+				const [path, directive = ''] = (element.getAttribute(attributeName) ?? '')
+					.replace(/\s/g, '')
+					.split(';');
+				if (!path) {
+					return;
+				}
+				const callLifecycle = () => {
+					Vorth.lsCaller(path, element, html, onAttributeChanged, onDisconnected, onViewPort);
+				};
+				if (directive === Vorth.pre) {
+					callLifecycle();
 					return;
 				}
 				onViewPort({
@@ -391,116 +477,141 @@ export class Vorth {
 						/**
 						 * disable default of onViewCallback
 						 */
-						const vorth = await this.importVorth(path_);
-						if (!vorth) {
-							return;
-						}
-						/**
-						 * @type {(Let<any>|false)[]}
-						 */
-						const signals = [];
-						await vorth({
-							element,
-							html,
-							isConnected,
-							onAttributeChanged,
-							onDisconnected,
-							onViewPort,
-							importLib: this.importLib,
-							$: (effect) => new $(effect),
-							loopedAttrName: this.loopedAttr,
-							parsedLoopedAttr: () => {
-								try {
-									const objString = element.getAttribute(this.loopedAttr);
-									return JSON.parse(objString);
-								} catch (error) {
-									return error;
-								}
-							},
-							for_: (options) => this.for({ element, ...options }),
-							importData: this.importData,
-							// @ts-ignore
-							let_: (obj) => {
-								/**
-								 * @type {Let|false}
-								 */
-								let signal = false;
-								if ('dataOnly' in obj) {
-									signal = new Let(obj.dataOnly);
-								} else {
-									const { attributeName, data } = obj;
-									signal = new Let(data, attributeName, {
-										bypassNested: false,
-										documentScope: element,
-									});
-									new $(async () => {
-										try {
-											// @ts-ignore
-											Let.domReflector(
-												// @ts-ignore
-												signal.value,
-												attributeName,
-												element,
-												signal
-											);
-										} catch (error) {
-											console.log(error);
-										}
-									});
-								}
-								signals.push(signal);
-								return signal;
-							},
-							// @ts-ignore
-							derived: (obj) => {
-								/**
-								 * @type {Derived|false}
-								 */
-								let signal = false;
-								if ('dataOnly' in obj) {
-									signal = new Derived(obj.dataOnly);
-								} else {
-									const { attributeName, data } = obj;
-									signal = new Derived(data, attributeName, {
-										bypassNested: false,
-										documentScope: element,
-									});
-									new $(async () => {
-										try {
-											// @ts-ignore
-											Let.domReflector(
-												// @ts-ignore
-												signal.value,
-												attributeName,
-												element,
-												signal
-											);
-										} catch (error) {
-											console.log(error);
-										}
-									});
-								}
-								signals.push(signal);
-								return signal;
-							},
-						});
-						onDisconnected(async () => {
-							/**
-							 * allredy automatic feed trough `lifecyclesOnDisconnected`;
-							// removeOnViewCallback();
-							// removeOnExitViewCallback();
-							// unobserveElement();
-							*/
-							for (let i = 0; i < signals.length; i++) {
-								const signal = signals[i];
-								if (signal) {
-									signal.unRef();
-								}
-							}
-						});
+						callLifecycle();
 					},
 				});
 			},
 		});
 	};
+	/**
+	 * @param {import('vorth/src/lifecycles/lifecyclesList.mjs').lifecyclesList} lifecycleName
+	 * @param {HTMLElement} element
+	 * @param {boolean} [waitForOnViewToRender]
+	 * @returns {void}
+	 */
+	static triggerLifecycle = (lifecycleName, element, waitForOnViewToRender = true) => {
+		const copy = element.cloneNode();
+		if (!(copy instanceof HTMLElement)) {
+			return;
+		}
+		copy.setAttribute(
+			Vorth.namespace,
+			waitForOnViewToRender ? lifecycleName : `${lifecycleName};${Vorth.pre}`
+		);
+		element.outerHTML = copy.outerHTML;
+	};
+	/**
+	 * @typedef {import('./lifecycles/vorthLifecycle.mjs').vorthLifecycleOptions} vorthLifecycleOptions
+	 * @private
+	 * @param {string} path_
+	 * @param {HTMLElement} element
+	 * @param {vorthLifecycleOptions["html"]} html
+	 * @param {vorthLifecycleOptions["onAttributeChanged"]} onAttributeChanged
+	 * @param {vorthLifecycleOptions["onDisconnected"]} onDisconnected
+	 * @param {vorthLifecycleOptions["onViewPort"]} onViewPort
+	 * @param {Array<$>} effects
+	 * @param {Array<Let|false>} signals
+	 */
+	static vorthLifecycle = async (
+		path_,
+		element,
+		html,
+		onAttributeChanged,
+		onDisconnected,
+		onViewPort,
+		effects,
+		signals
+	) => {
+		const importedLifecycle = await Vorth.importLifecycle(path_);
+		if (!importedLifecycle) {
+			return;
+		}
+		/**
+		 * @type {vorthLifecycleOptions}
+		 */
+		const vorth = {
+			element,
+			html,
+			onAttributeChanged,
+			onDisconnected,
+			onViewPort,
+			on: new on(element, onDisconnected).on,
+			attr: ({ on, waitForOnViewToRender = true }) =>
+				select(
+					helper.attributeIndexGenerator(true),
+					{ on, isGlobal: false, waitForOnViewToRender },
+					element,
+					true
+				).attr,
+			select: (attributeName, options) => select(attributeName, options, element),
+			qFIFO: Q.fifo,
+			qUnique: Q.unique,
+			importWorker,
+			// @ts-ignore
+			importLib: async (relativePath) => {
+				const lib = await importLib(relativePath);
+				if (lib && helper.isAsync(lib)) {
+					// @ts-ignore
+					return async (...params) => await lib(vorth, ...params);
+				}
+				// @ts-ignore
+				return (...params) => lib(vorth, ...params);
+			},
+			// @ts-ignore
+			importData: async (relativePath) => await Vorth.importData(relativePath, vorth),
+			$: (effect) => Vorth.$(effect, effects),
+			lifecycleAttr,
+			for_: {
+				data: async (options) => await Vorth.for({ element, ...options, vorth }),
+				of: (_ = undefined) => {
+					return Vorth.of(_, element, signals);
+				},
+			},
+			// @ts-ignore
+			let_: (obj) => Vorth.let(obj, element, signals),
+			// @ts-ignore
+			derived: (obj) => Vorth.derived(obj, element, signals),
+			triggerLifecycle: Vorth.triggerLifecycle,
+		};
+		await importedLifecycle(vorth);
+	};
+	/**
+	 * @type {string}
+	 */
+	static pathData = '';
+	/**
+	 * @type {string}
+	 */
+	static pathLibs = '';
+	/**
+	 * @type {string}
+	 */
+	static pathLifecycles = '';
+	/**
+	 * @type {string}
+	 */
+	static pathWorkers = '';
+	/**
+	 * @type {Vorth}
+	 */
+	static _;
+	constructor() {
+		if (Vorth._ instanceof Vorth) {
+			helper.warningSingleton(Vorth);
+			return;
+		}
+		Vorth._ = this;
+		Vorth.base = new URL('./', import.meta.url).href;
+		Vorth.pathData = `${Vorth.base}data/`;
+		Vorth.pathLibs = `${Vorth.base}libs/`;
+		Vorth.pathLifecycles = `${Vorth.base}lifecycles/`;
+		Vorth.pathWorkers = `${Vorth.base}workers/`;
+		Vorth.assignProperties();
+		/**
+		 * @private
+		 * @param {string} relativePath
+		 * @returns {Promise<import('./vorthLib.type.mjs/index.js').vorthLib<any, any>>}
+		 */
+		Vorth.assignLifecycle();
+	}
 }

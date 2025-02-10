@@ -1,0 +1,56 @@
+{
+	/**
+	 * vorth official snippets
+	 */
+	"workerThread": {
+		"scope": "javascript,typescript",
+		"prefix": ">>workerThread",
+		"body": [
+			"/**",
+			" * @type {(this: WindowEventHandlers, ev: MessageEvent) =>Promise<any>}",
+			" */",
+			"self.onmessage = async function (event) {",
+			"// code....",
+			"// self.postMessage(${0:message})",
+			"};"
+		],
+		"description": "workerThread"
+	},
+	"tsVorthData": {
+		"scope": "typescript",
+		"prefix": ">>data",
+		"body": [
+			"import type { vorthData } from 'vorth';",
+			"",
+			"export const data: vorthData<${1:isDerived?}, ${2:signalValueType}> =${0:}"
+		],
+		"description": "tsVorthData"
+	},
+	"tsVorthLib": {
+		"scope": "typescript",
+		"prefix": ">>lib",
+		"body": [
+			"import type { vorthLib } from 'vorth';",
+			"",
+			"export const lib: vorthLib<(${1:...argumentsTypes})=>Promise<${3:returnType}>> = async (",
+			"{${4:...vorthOptions}},",
+			"${2:parameters}",
+			") => {",
+			"\t${0:}",
+			"};"
+		],
+		"description": "tsVorthLib"
+	},
+	"tsVorthLifecycle": {
+		"scope": "typescript",
+		"prefix": ">>lifecycle",
+		"body": [
+			"import type { vorthLifecycle } from 'vorth';",
+			"",
+			"export const lifecycle: vorthLifecycle = async ({${1:...vorthLifecycleOptions}}) => {",
+			"\t${0:}",
+			"};"
+		],
+		"description": "tsVorthLifecycle"
+	}
+}

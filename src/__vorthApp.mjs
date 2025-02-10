@@ -2,76 +2,42 @@
 
 import chokidar from 'chokidar';
 import esbuild from 'esbuild';
-import { unlinkSync, rmdirSync } from 'fs';
+import { fileURLToPath } from 'url';
+import {
+	unlinkSync,
+	rmdirSync,
+	existsSync,
+	statSync,
+	rmSync,
+	writeFileSync,
+	readdirSync,
+	realpathSync,
+	readFileSync,
+} from 'fs';
 import { join, basename, extname } from 'path';
-import { _QueueFIFO, _QueueObjectFIFO } from '@html_first/simple_queue';
+import { _Queue, _QueueFIFO, _QueueObject, _QueueObjectFIFO } from '@html_first/simple_queue';
 
 /**
  * @description
- * for developer who want to use package managers:
- * - download the `prebundled.mjs`, and load it on your html:
- * ```html
- * <script type="module" src="/target/path/prebundled.mjs"></script>
- * ```
- * - you can instantiate this class to monitor directory;
- * ```js
- * // /dev/vorth.mjs
- * // @ts-check
- * import { __vorthApp } from 'vorth/src/__vorthApp.mjs'; // the main `vorth` got poluted with `Vorth` which refer to browser window;
- * new __vorthApp('source/path', 'target/path');
- * ```
- * - inside `source/path` do this:
- * > - place downloaded `./prebundled.mjs`;
- * > - create dir:
- * > > - `./lifecycles`;
- * > > - `./data`;
- * > > - `./libs`;
- * - add runner script to `package.json` `script`;
- * ```json
- * {
- * 	...
- * 	"scripts":{
- * 		...
- * 		"myscript" : "node ./dev/vorth.mjs",
- * 		...
- * 	},
- * 	...
- * }
- * ```
- * - run by calling `myscript` on terminal using packageManager;
- * ```bash
- * npm run myscript;
- * ```
- * - instead of copy pasting type helper from this README.md you can use exported type of `vorth` for the respective `modules`;
- * ```ts
- * // typescript
- * import type { vorthData, vorthLib, vorthLifecycle } from 'vorth';
- * const module_ : vorthData = {};
- * export default module_
- * ```
- * ```js
- * // mjs with jsdoc
- * // @ts-check
- * /**
- * * [blank]@typedef {import('vorth').vorthData} vorthData
- * * [blank]@typedef {import('vorth').vorthLib} vorthLib
- * * [blank]@typedef {import('vorth').vorthLifecycle} vorthLifecycle
- * * [blank]@type {vorthData}
- * *[blank]/
- * export default {};
- * ```
+ * for developer who want to add external modules from package managers;
+ *
  */
 export class __vorthApp {
+	/**
+	 * @typedef {import('fs').Dirent} Dirent
+	 */
 	/**
 	 * @private
 	 * @type {__vorthApp}
 	 */
 	static __;
 	/**
-	 * @param {string} sourcePath
-	 * @param {string} target
+	 * @param {Object} arg0
+	 * @param {string} arg0.sourcePath
+	 * @param {string} arg0.targetPath
+	 * @param {boolean} [arg0.minify]
 	 */
-	constructor(sourcePath, target) {
+	constructor({ sourcePath, targetPath, minify = true }) {
 		if (__vorthApp.__ instanceof __vorthApp) {
 			console.warn({
 				singleton: '`__vorthApp` is a singleton class',
@@ -79,91 +45,407 @@ export class __vorthApp {
 			});
 			return __vorthApp.__;
 		}
-		this.basePath = process.cwd();
-		this.target = join(this.basePath, target);
-		this.sourcePath = join(this.basePath, sourcePath);
-		this.watcher = chokidar.watch(this.sourcePath);
-		this.watcher
-			.on('add', this.handler)
-			.on('change', this.handler)
+		__vorthApp.minify = minify;
+		__vorthApp.plugins = minify ? [__vorthApp.cleanHTML()] : [];
+		__vorthApp.basePath = process.cwd();
+		__vorthApp.target = join(__vorthApp.basePath, targetPath);
+		__vorthApp.sourcePath = join(__vorthApp.basePath, sourcePath);
+		__vorthApp.watcher = chokidar.watch(__vorthApp.sourcePath);
+		__vorthApp.resolvedCorePath = realpathSync(fileURLToPath(new URL('./', import.meta.url)));
+		__vorthApp.cleanupTarget();
+		__vorthApp.bundleVorthMain();
+		__vorthApp.watcher
+			.on('add', (path_, stats) => {
+				__vorthApp.handler(path_, stats, false, true);
+			})
+			.on('change', (path_, stats) => {
+				__vorthApp.handler(path_, stats, false);
+			})
 			.on('unlink', (path_, stats) => {
-				this.handler(path_, stats, 'file');
+				__vorthApp.handler(path_, stats, 'file', true);
 			})
 			.on('unlinkDir', (path_, stats) => {
-				this.handler(path_, stats, 'dir');
+				__vorthApp.handler(path_, stats, 'dir', true);
 			});
-		this.queueHandler = new _QueueFIFO();
 	}
 	/**
 	 * @private
-	 * @type {string}
+	 * @type {import('esbuild').Plugin[]}
 	 */
-	basePath;
+	static plugins;
+	/**
+	 * @private
+	 * @type {boolean}
+	 */
+	static minify;
 	/**
 	 * @private
 	 * @type {string}
 	 */
-	target;
+	static target;
+	/**
+	 * @private
+	 * @type {string}
+	 */
+	static sourcePath;
+	/**
+	 * @private
+	 * @type {string}
+	 */
+	static resolvedCorePath;
+	/**
+	 * @private
+	 * @type {string}
+	 */
+	static basePath;
+	/**
+	 * @private
+	 * @type {_Queue}
+	 */
+	static queueUniqueHandler = new _Queue();
 	/**
 	 * @private
 	 * @type {_QueueFIFO}
 	 */
-	queueHandler;
+	static queueFIFOHandler = new _QueueFIFO();
 	/**
 	 * @private
 	 * @type {import('chokidar').FSWatcher}
 	 */
-	watcher;
+	static watcher;
 	/**
 	 * @typedef {'file'|'dir'} unlinkMode
 	 */
 	/**
 	 * @private
-	 * @param {string} path_
-	 * @param {import('fs').Stats} stats
-	 * @param {unlinkMode|false} unlink
 	 * @returns {void}
 	 */
-	handler = (path_, stats, unlink = false) => {
-		this.queueHandler.assign(
+	static cleanupTarget = () => {
+		this.queueFIFOHandler.assign(
 			new _QueueObjectFIFO(async () => {
-				await this.trueHandler(path_, stats, unlink);
+				const deletePath = this.target;
+				const stats = existsSync(deletePath) ? statSync(deletePath) : null;
+				if (stats && stats.isDirectory()) {
+					rmSync(deletePath, { recursive: true, force: true });
+					console.log({
+						message: 'succesfully reset',
+						target: deletePath,
+					});
+					return;
+				}
+				console.log({
+					target: deletePath,
+					message: 'target is in `clean-slate`',
+				});
+			})
+		);
+	};
+	/**
+	 * Recursively reads a directory and returns all files with their full paths.
+	 * @param {string} dirPath - The directory to read.
+	 * @param {Dirent[]} fileList - An accumulator array for the file paths (default: empty array).
+	 * @returns {Dirent[]} - Array of file paths.
+	 */
+	static readFilesNestedSync = (dirPath, fileList = []) => {
+		const entries = readdirSync(dirPath, { withFileTypes: true });
+		for (const entry of entries) {
+			if (entry.isDirectory()) {
+				this.readFilesNestedSync(join(dirPath, entry.name), fileList);
+			} else if (entry.isFile()) {
+				fileList.push(entry);
+			}
+		}
+		return fileList;
+	};
+	/**
+	 * @private
+	 * @param {string} path_
+	 * @param {import('fs').Stats} [_]
+	 */
+	static generateType = async (path_, _) => {
+		const relative = path_.replace(this.sourcePath, '').replace(/\//g, '\\').split('\\');
+		relative.shift();
+		let typeof_;
+		const typeof__ = relative[0];
+		switch (typeof__) {
+			case 'workers':
+			case 'libs':
+			case 'data':
+			case 'lifecycles':
+				typeof_ = typeof__;
+				break;
+		}
+		if (!typeof_) {
+			return;
+		}
+		this.queueUniqueHandler.assign(
+			new _QueueObject(
+				typeof_,
+				async () => {
+					const fileBaseName = `${typeof_}List`;
+					const file_ = join(this.resolvedCorePath, typeof_, `${fileBaseName}.mjs`);
+					const folder_ = join(this.sourcePath, typeof_);
+					const files_ = this.readFilesNestedSync(folder_);
+					const listName = [];
+					for (let i = 0; i < files_.length; i++) {
+						const file__ = files_[i];
+						listName.push(
+							join(file__.parentPath.replace(this.sourcePath, ''), file__.name)
+								.replace('\\', '')
+								.replace(/\\/g, '/')
+								.replace(`${typeof_}/`, '')
+								.replace(extname(file__.name), '')
+						);
+					}
+					const generatedList = `{'${listName.join("'|'")}'}`;
+					let modifiedContent = `/** 
+ * generated by \`__vorthApp\` instance
+ */
+// @ts-check
+/**
+ * @typedef ${generatedList} ${fileBaseName}
+ */
+/**
+ * @template {${fileBaseName}} T`;
+					switch (typeof__) {
+						case 'lifecycles':
+							modifiedContent = `${modifiedContent}
+ * @param {T} lifecycleName
+ * @returns {\`vorth='\${T}'\`}
+ */
+export const lifecycleAttr = (lifecycleName) => \`vorth='\${lifecycleName}'\`;
+`;
+							break;
+						case 'workers':
+							modifiedContent = `${modifiedContent}
+ * @callback importWorker
+ * @param {T} path_
+ * @param {boolean} [sharedSignal]
+ * - whether to share the signal througout the callers to \`path_\`;
+ * - true default;
+ * - if you called importWorker inside \`derived\` data, the value will allways be true;
+ * @returns {Promise<[signal:import('virst').Let<MessageEvent>, postMessage:(message: any, options?: StructuredSerializeOptions)=>void]>}
+ * due to the prerequisite of offloading callculation to a worker is that the calculation have to be massive and/or might take times for a single calculation to finish, the request will be debounced and only will calculate the first and the last of the request logged through \`unique Ping\`
+ */
+`;
+							break;
+						case 'libs':
+							{
+								const extender = ['void'];
+								for (let i = 0; i < listName.length; i++) {
+									const file_ = files_[i];
+									const fullPath = join(file_.parentPath, file_.name);
+									const regex = /vorthLib<\(([^)]+)\)\s*=>\s*Promise\s*<([^>]+)>/s;
+									const [_, args, awaitedReturnType] = readFileSync(fullPath, {
+										encoding: 'utf-8',
+									}).match(regex);
+									const name = listName[i];
+									extender.unshift(`T extends '${name}'?(${args})=>Promise<${awaitedReturnType}>`);
+								}
+								modifiedContent = `${modifiedContent}
+ * @callback importLib
+ * @param {T} relativePath
+ * - relativePath of lib inside \`libs\`;
+ * @returns {Promise<${extender.join(':')}>}
+ */`;
+							}
+							break;
+						case 'data':
+							{
+								const extender = ['void'];
+								for (let i = 0; i < listName.length; i++) {
+									const file_ = files_[i];
+									const fullPath = join(file_.parentPath, file_.name);
+									const regex = /vorthData<(.+?),(.+?)>/s;
+									const [_, isDerived, dataType] = readFileSync(fullPath, {
+										encoding: 'utf-8',
+									}).match(regex);
+									const name = listName[i];
+									const dataType_ = dataType.replace(/\s+/g, '');
+									const mode =
+										isDerived === 'true'
+											? `import('virst').Derived<${dataType_}>`
+											: `import('virst').Let<${dataType_}>`;
+									extender.unshift(`T extends '${name}'?${mode}`);
+								}
+								modifiedContent = `${modifiedContent}
+ * @callback importData
+ * @param {T} relativePath
+ * - relativePath of data inside \`data\`;
+ * @param {import('../lifecycles/vorthLifecycle.mjs').vorthLifecycleOptions} [vorth]
+ * - auto filled by Vorth, keep it unfilled!!!;
+ * @returns {Promise<${extender.join(':')}>}
+ */`;
+							}
+							break;
+					}
+					writeFileSync(file_, modifiedContent, 'utf-8');
+					console.log({
+						message: `succesfully assign types of ${typeof_}`,
+						file_,
+					});
+				},
+				100
+			)
+		);
+	};
+	/**
+	 * @private
+	 * @param {string} path_
+	 * @param {import('fs').Stats} [stats]
+	 * @param {unlinkMode|false} [unlink]
+	 * @param {boolean} [isSrcListChanges]
+	 * @returns {void}
+	 */
+	static handler = (path_, stats, unlink = false, isSrcListChanges = false) => {
+		this.queueFIFOHandler.assign(
+			new _QueueObjectFIFO(async () => {
+				await this.trueBundleAndMinify(path_, unlink);
+			})
+		);
+		if (!isSrcListChanges) {
+			return;
+		}
+		this.generateType(path_, stats);
+	};
+	/**
+	 * @private
+	 * @returns {import('esbuild').Plugin}
+	 */
+	static cleanHTML = () => {
+		return {
+			name: 'delete-template-literal-whitespace',
+			setup: (build) => {
+				build.onEnd(async (result) => {
+					if (result.errors.length > 0) {
+						return;
+					}
+					this.queueUniqueHandler.assign(
+						new _QueueObject(
+							'cleanHTML-whitespace',
+							async () => {
+								const outputDirents = this.readFilesNestedSync(this.target);
+								for (let i = 0; i < outputDirents.length; i++) {
+									const dirent = outputDirents[i];
+									if (!dirent.name.endsWith('.mjs')) {
+										return;
+									}
+									const filename = join(dirent.parentPath, dirent.name);
+									try {
+										const content = readFileSync(filename, 'utf-8');
+										const regex = /(?<=`(?:\\.|[^`])*?)\s{2,}(?=(?:\\.|[^`])*?`)/g;
+										if (regex.test(content)) {
+											const modifiedContent = content
+												.replace(regex, ' ')
+												.replace(/\s*(<|>)\s*/g, '$1');
+											writeFileSync(filename, modifiedContent, 'utf-8');
+											console.log({
+												message:
+													'succesfully minify whitespace from template literal called by `html` function',
+												filename,
+											});
+										}
+									} catch (error) {
+										console.error({
+											error,
+											message:
+												'unable to minify whitespace from template literal called by `html` function',
+											filename,
+										});
+									}
+								}
+							},
+							1000
+						)
+					);
+				});
+			},
+		};
+	};
+	/**
+	 * @private
+	 */
+	static bundleVorthMain = async () => {
+		this.queueFIFOHandler.assign(
+			new _QueueObjectFIFO(async () => {
+				const fileName = 'vorthInitiator.mjs';
+				const from = join(this.resolvedCorePath, fileName);
+				const to = join(this.target);
+				try {
+					await esbuild.build({
+						entryPoints: [from],
+						outdir: this.target,
+						minify: true,
+						format: 'esm',
+						bundle: true,
+						absWorkingDir: this.basePath,
+						treeShaking: true,
+						outExtension: {
+							'.js': '.mjs',
+						},
+						plugins: this.plugins,
+						banner: {
+							js: `/** @module */`, // Ensures module-level JSDoc is included
+						},
+					});
+					console.log({ message: 'succesfully bundled', from, to });
+				} catch (error) {
+					console.error({
+						...error,
+						message: 'failed to bundle',
+						from,
+						to,
+					});
+				}
 			})
 		);
 	};
 	/**
 	 * @private
 	 * @param {string} from
-	 * @param {import('fs').Stats} _
 	 * @param {unlinkMode|false} [unlink]
 	 * @returns {Promise<void>}
 	 */
-	trueHandler = async (from, _, unlink = false) => {
+	static trueBundleAndMinify = async (from, unlink = false) => {
+		const extention = extname(from);
+		switch (extention) {
+			case '.mjs':
+			case '.mts':
+			case '.ts':
+				break;
+			default:
+				return;
+		}
 		const target = this.target;
 		const sourcePath = this.sourcePath;
 		const toDir = from.replace(sourcePath, target);
-		const to = toDir.replace(extname(from), '.mjs');
+		const to = toDir.replace(extention, '.mjs');
 		try {
 			const relativeTarget = from.replace(sourcePath, target).replace(basename(from), '');
 			if (unlink === 'file') {
-				unlinkSync(to);
+				unlinkSync(toDir);
 				console.log({ message: 'succesfully delete', original: from, target: to });
 				return;
 			}
 			if (unlink === 'dir') {
-				let success = true;
 				const handleRmdir = () => {
 					setTimeout(() => {
 						try {
-							rmdirSync(toDir);
+							if (existsSync(toDir)) {
+								rmdirSync(toDir);
+								console.log({
+									message: 'succesfully delete',
+									original: from,
+									target: toDir,
+								});
+								return;
+							}
 							console.log({
-								message: 'succesfully delete',
+								message: 'succesfully delete by side effect',
 								original: from,
 								target: toDir,
 							});
-							success = true;
 						} catch (error) {
-							success = false;
 							handleRmdir();
 						}
 					}, 1000);
@@ -174,14 +456,20 @@ export class __vorthApp {
 			await esbuild.build({
 				entryPoints: [from],
 				outdir: relativeTarget,
-				minify: true,
+				minify: this.minify,
 				format: 'esm',
 				bundle: true,
+				absWorkingDir: this.basePath,
+				treeShaking: true,
 				outExtension: {
 					'.js': '.mjs',
 				},
+				plugins: this.plugins,
+				banner: {
+					js: `/** @module */`, // Ensures module-level JSDoc is included
+				},
 			});
-			console.log({ message: 'succesfully bundled', from, to, with: 'esbuild' });
+			console.log({ message: 'succesfully bundled', from, to });
 		} catch (error) {
 			console.error({
 				...error,
