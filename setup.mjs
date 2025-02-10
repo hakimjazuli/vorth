@@ -11,30 +11,29 @@ class setup {
 	static vscode = '.vscode';
 	static vsCodeSnippets = path.join(setup.__dirname, setup.vscode);
 	static targetDir = process.env.INIT_CWD || process.cwd();
+	static srcDefaultFolders = ['data', 'workers', 'libs', 'lifecycles'];
 	static run = async () => {
 		try {
-			await setup.copyFiles(setup.sourceDir, setup.targetDir);
-			await setup.copyFiles(setup.vsCodeSnippets, path.join(setup.targetDir, setup.vscode));
+			const handlers = [];
+			const srcDefaultFolders = setup.srcDefaultFolders;
+			for (let i = 0; i < srcDefaultFolders.length; i++) {
+				handlers.push(
+					async () =>
+						await fs.mkdir(path.join(setup.targetDir, 'src', srcDefaultFolders[i]), {
+							recursive: true,
+						})
+				);
+			}
+			handlers.push(async () => await setup.copyFiles(setup.sourceDir, setup.targetDir));
+			handlers.push(
+				async () =>
+					await setup.copyFiles(setup.vsCodeSnippets, path.join(setup.targetDir, setup.vscode))
+			);
+			await Promise.all(handlers);
 			console.log('✅ Starter project setup complete!');
 		} catch (err) {
 			console.error('❌ Error setting up project:', err);
 		}
-	};
-	/**
-	 * Recursively finds the project root by locating `node_modules`
-	 * @param {string} dir - Starting directory
-	 * @returns {string} - The actual project root
-	 */
-	static findProjectRoot = (dir) => {
-		while (dir !== path.parse(dir).root) {
-			if (path.basename(dir) === 'node_modules') {
-				// Move up once more to get the project root
-				return path.dirname(dir);
-			}
-			dir = path.dirname(dir); // Move up one level
-		}
-		// If no `node_modules` is found, fallback to INIT_CWD or process.cwd()
-		return process.env.INIT_CWD || process.cwd();
 	};
 
 	/**
