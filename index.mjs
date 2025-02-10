@@ -44,8 +44,9 @@
  * - if you use `__vorthApp` and find generated endpoint contains import statement, please report as bug, along with the source and the produced endpoint;
  * 
  * versions
- * - v0.9.0:
- * >- this is a test version, for smooth installation;
+ * >- `v0.10.x`:
+ * >>- beta for full release;
+ * >>- need to be checked for edge cases;
  */
 export { StaticVorthData } from './src/data/StaticVorthData.mjs';
 export { StaticVorthLib } from './src/libs/StaticVorthLib.mjs';

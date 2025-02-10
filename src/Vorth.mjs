@@ -14,6 +14,33 @@ import { on } from './lifecycles/on.mjs';
  */
 /**
  * @description
+ * if you want to develop it directly in the static endpoint;
+ * - download `./initiator.mjs` and `.vscode` from this `git repo` or `npm code`;
+ * - load `targetPath/initiator.mjs` to your `html`;
+ * ```html
+ * <script type="module" src="targetPath/initiator.mjs"></script>
+ * ```
+ * - add neccessary attribute to `vorthInitiator.mjs` like `defer`(if you put it in the head tag);
+ * - structure your folder:
+ * >- targetPath
+ * >>- `data`
+ * >>- `libs`
+ * >>- `lifecycles`
+ * >>- `workers`
+ * - use snippet prefixed by <b>`>>static`</b> for quick typehinting and <b>`>>workerThread`</b> are shared snippet;
+ * - add `property control` for vorth in the head tag if neccessary;
+ * ```html
+ * <meta property="vorth-batch" content="10" />
+ * ```
+ * >- [`property="vorth-batch"`]: `content` used to tell <b>`vorth`</b> maximum element to be loaded at batch when crossing the `viewPort`;
+ * >- you can add `;pre` like this [`vorth="lifecycle/name;pre"`] to bypass this limit;
+ * >- `"lifecycle/name"` means you are pointing to `"targetPath/lifecycles/lifecycle/name.mjs"`, this patterns also applied to `importData`, `lifecycleAttr`, `importWorker`, `importLib`, to their respective folder;
+ * ```html
+ * <meta property="vorth-versionMin" content="1738851920151" />
+ * ```
+ * >- [`property="vorth-versionMin"`]: `content` used to tell <b>`vorth`</b> minimum `cachedDate` in `unix date ms` is allowed;
+ * >- you can dynamically provide this tag from the server, and that will refresh the `cachedDate` of <b>`vorth`</b> code (`managed internally`), while keeping client's session and local storage;
+ * - both `property control` are monitored, so when it's changed dynamically in the runtime, <b>`vorth`</b> will reactively apply the new value to it's logic;
  */
 export class Vorth {
 	static namespace = 'vorth';

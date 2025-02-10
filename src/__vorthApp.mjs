@@ -19,8 +19,27 @@ import { _Queue, _QueueFIFO, _QueueObject, _QueueObjectFIFO } from '@html_first/
 
 /**
  * @description
- * for developer who want to add external modules from package managers;
- *
+ * - for developer who want to add external modules from package managers;
+ * - install using npm to install `.vscode`, `snippets` and `starter project`;
+ * ```shell
+ * npm install vorth
+ * ```
+ * - you'll then have this folder structure
+ * >- `.vscode`
+ * >- `node_modules`
+ * >- `vorth`
+ * >>- `dev`
+ * >>>- `index.mjs`: `directory watcher`
+ * >>- `src`
+ * >>>- `data`
+ * >>>- `libs`
+ * >>>- `lifecycles`
+ * >>>- `workers`
+ * - modify `directory watcher` the `index.mjs` to suit your setting;
+ * - run `index.mjs` to start develop your <b>`vorth`</b> code;
+ * 	- <b>`vorth`</b> detects `.mjs`, `.ts`, and `.mts` extentions inside `src` directory, and bundles them to `targetPath` `1 to 1` it have to be in `esm`;
+ * 	- all static imports will be bundled;
+ * check at [Vorth](#vorth) for `property control`;
  */
 export class __vorthApp {
 	/**

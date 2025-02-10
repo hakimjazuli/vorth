@@ -37,8 +37,9 @@ refer to [virst](https://www.npmjs.com/package/virst):
 - if you use `__vorthApp` and find generated endpoint contains import statement, please report as bug, along with the source and the produced endpoint;
 
 versions
-- v0.9.0:
->- this is a test version, for smooth installation;
+>- `v0.10.x`:
+>>- beta for full release;
+>>- need to be checked for edge cases;
 ## type-helpers
 - [StaticVorthData](#staticvorthdata)
 - [StaticVorthLib](#staticvorthlib)
@@ -66,7 +67,7 @@ versions
 
 <h2 id="vorth">Vorth</h2>
 
-
+if you want to develop it directly in the static endpoint;- download `./initiator.mjs` and `.vscode` from this `git repo` or `npm code`;- load `targetPath/initiator.mjs` to your `html`;```html<script type="module" src="targetPath/initiator.mjs"></script>```- add neccessary attribute to `vorthInitiator.mjs` like `defer`(if you put it in the head tag);- structure your folder:>- targetPath>>- `data`>>- `libs`>>- `lifecycles`>>- `workers`- use snippet prefixed by <b>`>>static`</b> for quick typehinting and <b>`>>workerThread`</b> are shared snippet;- add `property control` for vorth in the head tag if neccessary;```html<meta property="vorth-batch" content="10" />```>- [`property="vorth-batch"`]: `content` used to tell <b>`vorth`</b> maximum element to be loaded at batch when crossing the `viewPort`;>- you can add `;pre` like this [`vorth="lifecycle/name;pre"`] to bypass this limit;>- `"lifecycle/name"` means you are pointing to `"targetPath/lifecycles/lifecycle/name.mjs"`, this patterns also applied to `importData`, `lifecycleAttr`, `importWorker`, `importLib`, to their respective folder;```html<meta property="vorth-versionMin" content="1738851920151" />```>- [`property="vorth-versionMin"`]: `content` used to tell <b>`vorth`</b> minimum `cachedDate` in `unix date ms` is allowed;>- you can dynamically provide this tag from the server, and that will refresh the `cachedDate` of <b>`vorth`</b> code (`managed internally`), while keeping client's session and local storage;- both `property control` are monitored, so when it's changed dynamically in the runtime, <b>`vorth`</b> will reactively apply the new value to it's logic;
 
 *) <sub>[go to exported list](#type-helpers)</sub>
 
@@ -78,6 +79,6 @@ versions
 
 <h2 id="__vorthapp">__vorthApp</h2>
 
-for developer who want to add external modules from package managers;
+- for developer who want to add external modules from package managers;- install using npm to install `.vscode`, `snippets` and `starter project`;```shellnpm install vorth```- you'll then have this folder structure>- `.vscode`>- `node_modules`>- `vorth`>>- `dev`>>>- `index.mjs`: `directory watcher`>>- `src`>>>- `data`>>>- `libs`>>>- `lifecycles`>>>- `workers`- modify `directory watcher` the `index.mjs` to suit your setting;- run `index.mjs` to start develop your <b>`vorth`</b> code;	- <b>`vorth`</b> detects `.mjs`, `.ts`, and `.mts` extentions inside `src` directory, and bundles them to `targetPath` `1 to 1` it have to be in `esm`;	- all static imports will be bundled;check at [Vorth](#vorth) for `property control`;
 
 *) <sub>[go to exported list](#type-helpers)</sub>
