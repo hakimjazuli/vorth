@@ -1,6 +1,6 @@
 // @ts-check
 
-import { promises as fs } from 'fs';
+import { existsSync, promises as fs } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -10,7 +10,7 @@ class setup {
 	static sourceDir = path.join(setup.__dirname, 'starter');
 	static vscode = '.vscode';
 	static vsCodeSnippets = path.join(setup.__dirname, setup.vscode);
-	static targetDir = process.cwd();
+	static targetDir = process.env.INIT_CWD || process.cwd();
 	static run = async () => {
 		try {
 			await setup.copyFiles(setup.sourceDir, setup.targetDir);
@@ -21,20 +21,41 @@ class setup {
 		}
 	};
 	/**
+	 * Recursively finds the project root by locating `node_modules`
+	 * @param {string} dir - Starting directory
+	 * @returns {string} - The actual project root
+	 */
+	static findProjectRoot = (dir) => {
+		while (dir !== path.parse(dir).root) {
+			if (path.basename(dir) === 'node_modules') {
+				// Move up once more to get the project root
+				return path.dirname(dir);
+			}
+			dir = path.dirname(dir); // Move up one level
+		}
+		// If no `node_modules` is found, fallback to INIT_CWD or process.cwd()
+		return process.env.INIT_CWD || process.cwd();
+	};
+
+	/**
 	 * @param {string} src
 	 * @param {string} dest
 	 */
 	static copyFiles = async (src, dest) => {
 		await fs.mkdir(dest, { recursive: true });
 		const entries = await fs.readdir(src, { withFileTypes: true });
+		if (entries.length === 0) {
+			console.log(`📁 Created empty directory: ${dest}`);
+			return;
+		}
 		for (const entry of entries) {
 			const srcPath = path.join(src, entry.name);
 			const destPath = path.join(dest, entry.name);
 			if (entry.isDirectory()) {
-				await setup.copyFiles(srcPath, destPath);
+				await this.copyFiles(srcPath, destPath);
 			} else {
 				await fs.copyFile(srcPath, destPath);
-				console.log(`Copied: ${entry.name}`);
+				console.log(`📄 Copied: ${entry.name}`);
 			}
 		}
 	};
