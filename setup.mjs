@@ -14,22 +14,14 @@ class setup {
 	static srcDefaultFolders = ['data', 'workers', 'libs', 'lifecycles'];
 	static run = async () => {
 		try {
-			const handlers = [];
 			const srcDefaultFolders = setup.srcDefaultFolders;
 			for (let i = 0; i < srcDefaultFolders.length; i++) {
-				handlers.push(
-					async () =>
-						await fs.mkdir(path.join(setup.targetDir, 'src', srcDefaultFolders[i]), {
-							recursive: true,
-						})
-				);
+				await fs.mkdir(path.join(setup.targetDir, 'src', srcDefaultFolders[i]), {
+					recursive: true,
+				});
 			}
-			handlers.push(async () => await setup.copyFiles(setup.sourceDir, setup.targetDir));
-			handlers.push(
-				async () =>
-					await setup.copyFiles(setup.vsCodeSnippets, path.join(setup.targetDir, setup.vscode))
-			);
-			await Promise.all(handlers);
+			setup.copyFiles(setup.sourceDir, setup.targetDir);
+			await setup.copyFiles(setup.vsCodeSnippets, path.join(setup.targetDir, setup.vscode));
 			console.log('✅ Starter project setup complete!');
 		} catch (err) {
 			console.error('❌ Error setting up project:', err);
