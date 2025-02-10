@@ -8,12 +8,13 @@ class setup {
 	static __filename = fileURLToPath(import.meta.url);
 	static __dirname = path.dirname(setup.__filename);
 	static sourceDir = path.join(setup.__dirname, 'starter');
-	static vsCodeSnippets = path.join(setup.__dirname, '.vscode');
+	static vscode = '.vscode';
+	static vsCodeSnippets = path.join(setup.__dirname, setup.vscode);
 	static targetDir = process.cwd();
 	static run = async () => {
 		try {
 			await setup.copyFiles(setup.sourceDir, setup.targetDir);
-			await setup.copyFiles(setup.vsCodeSnippets, setup.targetDir);
+			await setup.copyFiles(setup.vsCodeSnippets, path.join(setup.targetDir, setup.vscode));
 			console.log('✅ Starter project setup complete!');
 		} catch (err) {
 			console.error('❌ Error setting up project:', err);
