@@ -244,10 +244,9 @@ export class Vorth {
 		afterLoopCallback = undefined,
 		vorth = undefined,
 	}) => {
-		// @ts-expect-error
-		const child = element.firstElementChi;
-		// @ts-expect-error
-		ld.cloneNode(true);
+		const child = element.firstElementChild;
+
+		child.cloneNode(true);
 		if (!(child instanceof HTMLElement)) {
 			return;
 		}
@@ -342,7 +341,7 @@ export class Vorth {
 		/**
 		 * @type {Derived|false}
 		 */
-		let signal = false;
+		let signal;
 		if ('dataOnly' in obj) {
 			signal = new Derived(obj.dataOnly);
 		} else {
@@ -357,13 +356,8 @@ export class Vorth {
 					return;
 				}
 				try {
-					Let.domReflector(
-						value,
-						attr,
-						element,
-						// @ts-expect-error
-						signal
-					);
+					// @ts-expect-error
+					Let.domReflector(value, attr, element, signal);
 				} catch (error) {
 					console.error(error);
 				}
@@ -398,13 +392,8 @@ export class Vorth {
 					return;
 				}
 				try {
-					Let.domReflector(
-						value,
-						attr,
-						element,
-						// @ts-expect-error
-						signal
-					);
+					// @ts-expect-error
+					Let.domReflector(value, attr, element, signal);
 				} catch (error) {
 					console.error(error);
 				}

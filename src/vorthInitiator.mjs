@@ -1,4 +1,4 @@
-// @ts-ignore
+// @ts-check
 
 import { Vorth } from './Vorth.mjs';
 
