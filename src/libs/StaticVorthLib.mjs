@@ -26,8 +26,8 @@
  *  * @callback VorthDerived
  *  * @param {{dataOnly:()=>Promise<any>}|{attr:string, data:()=>Promise<any>}} obj
  *  * @returns {derivedInstance}
- *  * @typedef {HTMLElementEventMap & { vorth: CustomEvent}} ExtendedHTMLElementEventMap
- *  * @typedef {{[K in keyof ExtendedHTMLElementEventMap]? : (K extends 'vorth' ? {listener:  (this: HTMLElement, options:{$:$__, let_:VorthLet, derived:VorthDerived, onAttributeChanged:((options:{attr:string, newValue:string})=>Promise<void>), onDisconnected:(arg0:()=>Promise<void>)=>void})=>Promise<void>}: {listener:(this: HTMLElement, ev: ExtendedHTMLElementEventMap[K])=> void, options?:{onAdd?:boolean|AddEventListenerOptions, onRemove?:boolean|EventListenerOptions}})}} selectArg_On
+ *  * @typedef {HTMLElementEventMap & { vorth: CustomEvent }} ExtendedHTMLElementEventMap
+ *  * @typedef {{[K in keyof ExtendedHTMLElementEventMap]? : (K extends 'vorth' ? {listener:  (this: HTMLElement, options:{$:$__, let_:VorthLet, derived:VorthDerived, onAttributeChanged:((options:{attr:string, newValue:string})=>Promise<void>), domReflect:(derivedCallback:()=>Promise<import('../Vorth.mjs').anyButNull>)=>derivedInstance, onDisconnected:(arg0:()=>Promise<void>)=>void})=>Promise<void>}: {listener:(this: HTMLElement, ev: ExtendedHTMLElementEventMap[K])=> void, options?:{onAdd?:boolean|AddEventListenerOptions, onRemove?:boolean|EventListenerOptions}})}} selectArg_On
  *  * @callback ForData
  *  * @param {Object} a0
  *  * @param {string} a0.dataName

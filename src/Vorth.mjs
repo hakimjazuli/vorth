@@ -11,6 +11,7 @@ import { on } from './lifecycles/on.mjs';
 /**
  * @typedef {{}|null|number|string|boolean|symbol|bigint|function} anyButNull
  * @typedef {'vorth'} VorthNamespace
+ * @typedef {'domReflect'} VorthDomReflect
  */
 /**
  * @description
@@ -43,7 +44,14 @@ import { on } from './lifecycles/on.mjs';
  * - both `property control` are monitored, so when it's changed dynamically in the runtime, <b>`vorth`</b> will reactively apply the new value to it's logic;
  */
 export class Vorth {
+	/**
+	 * @type {VorthNamespace}
+	 */
 	static namespace = 'vorth';
+	/**
+	 * @type {VorthDomReflect}
+	 */
+	static domReflect = 'domReflect';
 	/**
 	 * @private
 	 * custom `HTMLelement` attribute imediately run lifecycle as soon as connected to the dom,
@@ -335,11 +343,12 @@ export class Vorth {
 	 * @param {{dataOnly:()=>Promise<V>}|{attr:string, data:()=>Promise<V>}} obj
 	 * @param {HTMLElement} [element]
 	 * @param {Array<Derived<V>|false>} [signals]
+	 * @param {Array<$>} [effects]
 	 * @returns {Derived<V>}
 	 */
-	static derived = (obj, element, signals) => {
+	static derived = (obj, element, signals, effects) => {
 		/**
-		 * @type {Derived|false}
+		 * @type {Derived}
 		 */
 		let signal;
 		if ('dataOnly' in obj) {
@@ -349,19 +358,9 @@ export class Vorth {
 			signal = new Derived(data, attr, {
 				documentScope: element,
 			});
-			new $(async () => {
-				// @ts-expect-error
-				const value = signal.value;
-				if (!element.hasAttribute(attr)) {
-					return;
-				}
-				try {
-					// @ts-expect-error
-					Let.domReflector(value, attr, element, signal);
-				} catch (error) {
-					console.error(error);
-				}
-			});
+			Vorth.$(async () => {
+				Let.domReflector(signal.value, attr, element, signal);
+			}, effects);
 		}
 		signals.push(signal);
 		return signal;
@@ -371,13 +370,14 @@ export class Vorth {
 	 * @param {{dataOnly:V}|{attr:string, data:V}} obj
 	 * @param {HTMLElement} [element]
 	 * @param {Array<Let<V>|false>} [signals]
+	 * @param {Array<$>} [effects]
 	 * @returns {Let<V>}
 	 */
-	static let = (obj, element, signals) => {
+	static let = (obj, element, signals, effects) => {
 		/**
-		 * @type {Let|false}
+		 * @type {Let}
 		 */
-		let signal = false;
+		let signal;
 		if ('dataOnly' in obj) {
 			signal = new Let(obj.dataOnly);
 		} else {
@@ -385,19 +385,9 @@ export class Vorth {
 			signal = new Let(data, attr, {
 				documentScope: element,
 			});
-			new $(async () => {
-				// @ts-expect-error
-				const value = signal.value;
-				if (!element.hasAttribute(attr)) {
-					return;
-				}
-				try {
-					// @ts-expect-error
-					Let.domReflector(value, attr, element, signal);
-				} catch (error) {
-					console.error(error);
-				}
-			});
+			Vorth.$(async () => {
+				Let.domReflector(signal.value, attr, element, signal);
+			}, effects);
 		}
 		signals.push(signal);
 		return signal;
@@ -411,7 +401,14 @@ export class Vorth {
 	 * @param {vorthLifecycleOptions["onDisconnected"]} onDisconnected
 	 * @param {vorthLifecycleOptions["onViewPort"]} onViewPort
 	 */
-	static lsCaller = (path_, element, html, onAttributeChanged, onDisconnected, onViewPort) => {
+	static lsCaller = async (
+		path_,
+		element,
+		html,
+		onAttributeChanged,
+		onDisconnected,
+		onViewPort
+	) => {
 		/**
 		 * @type {(Let<any>|false)[]}
 		 */
@@ -420,7 +417,7 @@ export class Vorth {
 		 * @type {($)[]}
 		 */
 		const effects = [];
-		Vorth.vorthLifecycle(
+		await Vorth.vorthLifecycle(
 			path_,
 			element,
 			html,
@@ -469,32 +466,18 @@ export class Vorth {
 				if (!path) {
 					return;
 				}
-				const callLifecycle = () => {
-					Vorth.lsCaller(path, element, html, onAttributeChanged, onDisconnected, onViewPort);
+				const callLifecycle = async () => {
+					await Vorth.lsCaller(path, element, html, onAttributeChanged, onDisconnected, onViewPort);
 				};
 				if (directive === Vorth.pre) {
-					callLifecycle();
+					await callLifecycle();
 					return;
 				}
-				onViewPort({
-					lifecyclesOnDisconnected: [onDisconnected],
-					onExitViewCallback: async () => {},
-					onViewCallback: async ({
-						unobserveElement,
-						removeOnExitViewCallback,
-						removeOnViewCallback,
-					}) => {
-						/**
-						 * disable default of onViewCallback
-						 */
-						removeOnViewCallback();
-						removeOnExitViewCallback();
-						unobserveElement();
-						/**
-						 * disable default of onViewCallback
-						 */
-						callLifecycle();
-					},
+				onViewPort(async ({ removeOnExitCallback, removeOnViewCallback, unobserveElement }) => {
+					removeOnViewCallback();
+					removeOnExitCallback();
+					unobserveElement();
+					await callLifecycle();
 				});
 			},
 		});
@@ -552,26 +535,22 @@ export class Vorth {
 			onDisconnected,
 			onViewPort,
 			on: new on(element, onDisconnected).on,
-			attr: ({ on, waitForOnViewToRender = true }) =>
+			attr: ({ on, domReflect, lifecycle, waitForOnViewToRender = true }) =>
 				select(
 					helper.attributeIndexGenerator(true),
-					{ on, isGlobal: false, waitForOnViewToRender },
+					{ on, domReflect, lifecycle, isGlobal: false, waitForOnViewToRender },
 					element,
 					true
 				).attr,
-			select: (attributeName, options) => select(attributeName, options, element),
+			select: (attributeName, options) => select(attributeName, options, element, false),
 			qFIFO: Q.fifo,
 			qUnique: Q.unique,
 			importWorker,
 			// @ts-ignore
 			importLib: async (relativePath) => {
 				const lib = await importLib(relativePath);
-				if (lib && helper.isAsync(lib)) {
-					// @ts-ignore
-					return async (...params) => await lib(vorth, ...params);
-				}
 				// @ts-ignore
-				return (...params) => lib(vorth, ...params);
+				return async (...params) => await lib(vorth, ...params);
 			},
 			// @ts-ignore
 			importData: async (relativePath) => await Vorth.importData(relativePath, vorth),
@@ -584,9 +563,9 @@ export class Vorth {
 				},
 			},
 			// @ts-ignore
-			let_: (obj) => Vorth.let(obj, element, signals),
+			let_: (obj) => Vorth.let(obj, element, signals, effects),
 			// @ts-ignore
-			derived: (obj) => Vorth.derived(obj, element, signals),
+			derived: (obj) => Vorth.derived(obj, element, signals, effects),
 			triggerLifecycle: Vorth.triggerLifecycle,
 		};
 		await importedLifecycle(vorth);

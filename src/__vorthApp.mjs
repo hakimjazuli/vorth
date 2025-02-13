@@ -229,11 +229,17 @@ export class __vorthApp {
 					switch (typeof__) {
 						case 'lifecycles':
 							modifiedContent = `${modifiedContent}
+  * @template {boolean} B
  * @param {T} lifecycleName
- * @returns {\`vorth='\${T}'\`}
+ * @param {B} [bypasWaitOnViewToRender]
+ * @returns {\`vorth='\${T}\${B extends true ? ';pre' : ''}'\`}
  */
-export const lifecycleAttr = (lifecycleName) => \`vorth='\${lifecycleName}'\`;
-`;
+// @ts-expect-error
+export const lifecycleAttr = (lifecycleName, bypasWaitOnViewToRender = false) => {
+	const pre = bypasWaitOnViewToRender ? ';pre' : '';
+	// @ts-expect-error
+	return \`vorth='\${lifecycleName}\${pre}'\`;
+};`;
 							break;
 						case 'workers':
 							modifiedContent = `${modifiedContent}

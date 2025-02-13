@@ -8,28 +8,17 @@
  * @typedef {Record<string, any>|Array|string|number|boolean} returnOfSignal
  * @typedef {(isAtInitialization:boolean)=>Promise<void>} effectCallback
  * @typedef {typeof import('../Vorth.mjs').Vorth} Vorth
- */
-/**
- * @typedef {Object} onViewPortHandler
- * @property {()=>void} removeOnExitViewCallback
- * @property {()=>void} removeOnViewCallback
- * @property {()=>void} unobserveElement
- */
-/**
- * @typedef {Object} elementsLCCallbacks
- * @property {(onViewCallbacksOptions: onViewPortHandler) => Promise<void>} onViewCallback
- * @property {(onViewCallbacksOptions: onViewPortHandler) => Promise<void>} onExitViewCallback
- * @property {vorthLifecycleOptions["onDisconnected"][]} lifecyclesOnDisconnected
+ * @typedef {typeof import('./select.mjs').$__} $__
  */
 /**
  * @typedef {Object} vorthLifecycleOptions
  * @property {(effect:effectCallback)=>$Instance} $
  * - to create `effect` on data changes;
- * @property {(options:{on:import('./select.mjs').selectArg_On, waitForOnViewToRender?:boolean})=>string} attr
+ * @property {(options:{domReflect?:()=>Promise<import('../Vorth.mjs').anyButNull>, lifecycle?:(this: HTMLElement, options:{$:$__, let_:Vorth["let"], derived:Vorth["derived"], onAttributeChanged:import('virst').attributeChangedLifecycle, onDisconnected:(arg0:()=>Promise<void>)=>void})=>Promise<void>, on?:import('./select.mjs').selectArg_On, waitForOnViewToRender?:boolean})=>string} attr
  * - best practice to add events and effects element for vorth;
  * @property {Vorth["derived"]} derived
  * - dataOnly?: reactive signal withou `DOM`;
- * - data?: use ase state without `domReflection`;
+ * - data?: use ase state without `domReflector`;
  * - attr?: to reflect the value to the DOM;
  * - returns `Dervied<returnOfSignal>`;
  * @property {HTMLElement} element
@@ -50,7 +39,7 @@
  * - typesafe import for data;
  * @property {Vorth["let"]} let_
  * - dataOnly?: reactive signla withou `DOM`;
- * - data?: use ase state without `domReflection`;
+ * - data?: use ase state without `domReflector`;
  * - attr?: to reflect the value to the DOM;
  * - returns `Let<returnOfSignal>`;
  * @property {import('vorth/src/lifecycles/lifecyclesList.mjs').lifecycleAttr} lifecycleAttr
@@ -60,7 +49,7 @@
  * - `handler`: will be called when element's attribute value changes;
  * @property {(handler:()=>Promise<void>)=>void} onDisconnected
  * - `handler`: will be called when element is disconnected from the `DOM`;
- * @property {(elementsCallbacks:elementsLCCallbacks)=>onViewPortInstance} onViewPort
+ * @property {(elementsCallbacks:onExitViewPortArg0)=>onViewPortInstance} onViewPort
  * - onViewPort helper for current element lifecycle;
  * @property {typeof import('virst').Q["fifo"]} qFIFO
  * - queue helper for opperation that might cause race condition;
@@ -75,6 +64,7 @@
  * @typedef {(vorthLifecycleOptions:vorthLifecycleOptions)=>Promise<void>} vorthLifecycle
  */
 /**
+ * @typedef {import('virst').onExitViewPortArg0} onExitViewPortArg0
  * @typedef {import('virst').onViewPort} onViewPortInstance
  * @typedef {import('virst').$} $Instance
  * @typedef {import('virst').Let} LetInstance
