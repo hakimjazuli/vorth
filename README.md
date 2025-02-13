@@ -24,9 +24,9 @@
 
 ## documentation for signal
 refer to [virst](https://www.npmjs.com/package/virst):
-- [Let](https://www.npmjs.com/package/virst#let) for exported `data.let`, only support dataOnly;
-- [Derived](https://www.npmjs.com/package/virst#derived) for derived function `data.derived`, only support dataOnly;
-- [$](https://www.npmjs.com/package/virst#$) for `$` as in `effect`;
+- [let_](https://www.npmjs.com/package/virst#let);
+- [derived](https://www.npmjs.com/package/virst#derived);
+- [$](https://www.npmjs.com/package/virst#$);
 
 ## further documentation and examples
 - will be posted in [html-first documentation website](https://html-first.bss.design/)
@@ -37,7 +37,8 @@ refer to [virst](https://www.npmjs.com/package/virst):
 - if you use `__vorthApp` and find generated endpoint contains import statement, please report as bug, along with the source and the produced endpoint;
 
 versions
->- `v0.10.x`:
+>- `v0.11.x`:
+>>- fixed `onViewPort` bugs;
 >>- beta for full release;
 >>- need to be checked for edge cases;
 ## type-helpers
