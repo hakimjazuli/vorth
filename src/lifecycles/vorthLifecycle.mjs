@@ -14,7 +14,7 @@
  * @typedef {Object} vorthLifecycleOptions
  * @property {(effect:effectCallback)=>$Instance} $
  * - to create `effect` on data changes;
- * @property {(options:{domReflect?:()=>Promise<import('../Vorth.mjs').anyButNull>, lifecycle?:(this: HTMLElement, options:{$:$__, let_:Vorth["let"], derived:Vorth["derived"], onAttributeChanged:import('virst').attributeChangedLifecycle, onDisconnected:(arg0:()=>Promise<void>)=>void})=>Promise<void>, on?:import('./select.mjs').selectArg_On, waitForOnViewToRender?:boolean})=>string} attr
+ * @property {(options:{domReflect?:()=>Promise<import('../Vorth.mjs').anyButUndefined>, lifecycle?:(this: HTMLElement, options:{$:$__, let_:Vorth["let"], derived:Vorth["derived"], onAttributeChanged:(arg0:import('virst').attributeChangedLifecycle)=>void, onDisconnected:(arg0:()=>Promise<void>)=>void})=>Promise<void>, on?:import('./select.mjs').selectArg_On, waitForOnViewToRender?:boolean})=>string} attr
  * - best practice to add events and effects element for vorth;
  * @property {Vorth["derived"]} derived
  * - dataOnly?: reactive signal withou `DOM`;
@@ -23,7 +23,7 @@
  * - returns `Dervied<returnOfSignal>`;
  * @property {HTMLElement} element
  * - current element reference of the current element lifecycle;
- * @property {{data:Vorth["for"], of:Vorth["of"]}} for_
+ * @property {{data:(a0:Omit<Parameters<Vorth["for"]>[0],'vorth'>)=>void, of:Vorth["of"]}} for_
  * - `data` loop function to loop through the signal using first child of the `element`:
  * - `as` used for data passed by `for_.data`;
  * > - value: `signal` value getter and setter, can be used in tandem with `$`;
@@ -35,7 +35,7 @@
  * - typesafe import for data;
  * @property {import('../libs/importLib.mjs').importLib} importLib
  * - typesafe import for libs;
- * @property {import('vorth/src/workers/importWorker.mjs').importWorker} importWorker
+ * @property {(a0:Parameters<import('vorth/src/workers/importWorker.mjs').importWorker>[0])=>Promise<{resultSignal:{value:MessageEvent}, postMessage:(message: any, options?: StructuredSerializeOptions)=>void}>} importWorker
  * - typesafe import for data;
  * @property {Vorth["let"]} let_
  * - dataOnly?: reactive signla withou `DOM`;
@@ -49,8 +49,6 @@
  * - `handler`: will be called when element's attribute value changes;
  * @property {(handler:()=>Promise<void>)=>void} onDisconnected
  * - `handler`: will be called when element is disconnected from the `DOM`;
- * @property {(elementsCallbacks:onExitViewPortArg0)=>onViewPortInstance} onViewPort
- * - onViewPort helper for current element lifecycle;
  * @property {typeof import('virst').Q["fifo"]} qFIFO
  * - queue helper for opperation that might cause race condition;
  * @property {typeof import('virst').Q["unique"]} qUnique
@@ -59,12 +57,14 @@
  * - best practice to select multiple elements to attach events and lifecycle to them;
  * @property {Vorth["triggerLifecycle"]} triggerLifecycle
  * - manually trigger lifecycle on an element;
+ * @property {import('../Vorth.mjs').onViewPortCallback} onViewPort
+ * - onViewPort helper for current element lifecycle;
  */
 /**
  * @typedef {(vorthLifecycleOptions:vorthLifecycleOptions)=>Promise<void>} vorthLifecycle
  */
 /**
- * @typedef {import('virst').onExitViewPortArg0} onExitViewPortArg0
+ * @typedef {import('virst').onViewCallbackOptions} onViewCallbackOptions
  * @typedef {import('virst').onViewPort} onViewPortInstance
  * @typedef {import('virst').$} $Instance
  * @typedef {import('virst').Let} LetInstance
@@ -72,7 +72,175 @@
  */
 
 /**
- *
- * @type {vorthLifecycle} param0
+ * @description
+ * typecheck
+ * @type {vorthLifecycle}
  */
-export const lifecycle = async ({}) => {};
+export const lifecycle = async (vorth) => {
+	const {
+		$,
+		attr,
+		derived,
+		element,
+		for_,
+		html,
+		importData,
+		importLib,
+		importWorker,
+		let_,
+		lifecycleAttr,
+		on,
+		onAttributeChanged,
+		onDisconnected,
+		onViewPort,
+		qFIFO,
+		qUnique,
+		select,
+		triggerLifecycle,
+	} = vorth;
+	$(async () => {});
+	attr({
+		async domReflect() {
+			return '';
+		},
+		async lifecycle({ $, derived, let_, onAttributeChanged, onDisconnected }) {
+			$(async () => {});
+			derived({
+				attr: '',
+				async data() {
+					return '';
+				},
+			});
+			derived({
+				async dataOnly() {
+					return '';
+				},
+			});
+			let_({
+				attr: '',
+				data: '',
+			});
+			let_({
+				dataOnly: '',
+			});
+			onAttributeChanged(async () => {});
+			onDisconnected(async () => {});
+		},
+		on: {
+			click: {
+				listener() {},
+				options: { onAdd: {}, onRemove: {} },
+			},
+		},
+	});
+	{
+		const { attr, call$, remove$, removeAll$, unRef, value } = derived({
+			attr: '',
+			async data() {
+				return '';
+			},
+		});
+	}
+	{
+		const { attr, call$, remove$, removeAll$, unRef, value } = derived({
+			async dataOnly() {
+				return '';
+			},
+		});
+	}
+	for_.data({
+		dataName: 'count_',
+		childLifescycle: 'app',
+		element: element,
+		waitForOnViewToRender: true,
+		async afterLoopCallback() {},
+	});
+	html`<div>hehe</div>`.inner();
+	html`<div>hehe</div>`.string;
+	{
+		const { attr, call$, remove$, removeAll$, unRef, value } = await importData('count');
+	}
+	{
+		const { attr, call$, remove$, removeAll$, unRef, value } = await importData('derived');
+	}
+	const log_ = await importLib('log');
+	log_({ a: '', b: 0 });
+	const { postMessage, resultSignal } = await importWorker('test');
+	{
+		const { value } = resultSignal;
+	}
+	{
+		const { attr, call$, remove$, removeAll$, unRef, value } = let_({
+			attr: '',
+			data: '',
+		});
+	}
+	{
+		const { attr, call$, remove$, removeAll$, unRef, value } = let_({
+			dataOnly: '',
+		});
+	}
+	lifecycleAttr('loop/child');
+	on({
+		click: {
+			listener() {},
+			options: {
+				onAdd: {},
+				onRemove: {},
+			},
+		},
+	});
+	onAttributeChanged(async ({ attr, newValue }) => {});
+	onDisconnected(async () => {});
+	onViewPort(
+		async ({ onExitViewPort, removeOnExitCallback, removeOnViewCallback, unobserveElement }) => {
+			removeOnViewCallback();
+			removeOnExitCallback();
+			unobserveElement();
+			onExitViewPort(async () => {});
+		}
+	);
+	{
+		const { resume } = await qFIFO();
+	}
+	{
+		const { resume } = await qUnique('');
+	}
+	select('', {
+		isGlobal: true,
+		async domReflect() {
+			return '';
+		},
+		async lifecycle({ $, derived, let_, onAttributeChanged, onDisconnected }) {
+			$(async () => {});
+			derived({
+				attr: '',
+				async data() {
+					return '';
+				},
+			});
+			derived({
+				async dataOnly() {
+					return '';
+				},
+			});
+			let_({
+				attr: '',
+				data: '',
+			});
+			let_({
+				dataOnly: '',
+			});
+			onAttributeChanged(async () => {});
+			onDisconnected(async () => {});
+		},
+		on: {
+			click: {
+				listener() {},
+				options: { onAdd: {}, onRemove: {} },
+			},
+		},
+		waitForOnViewToRender: true,
+	});
+	triggerLifecycle('app', element, true);
+};

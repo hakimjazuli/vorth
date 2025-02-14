@@ -5,14 +5,3 @@
 /**
  * @typedef {'test'} workersList
  */
-/**
- * @template {workersList} T
- * @callback importWorker
- * @param {T} path_
- * @param {boolean} [sharedSignal]
- * - whether to share the signal througout the callers to `path_`;
- * - true default;
- * - if you called importWorker inside `derived` data, the value will allways be true;
- * @returns {Promise<[signal:import('virst').Let<MessageEvent>, postMessage:(message: any, options?: StructuredSerializeOptions)=>void]>}
- * due to the prerequisite of offloading callculation to a worker is that the calculation have to be massive and/or might take times for a single calculation to finish, the request will be debounced and only will calculate the first and the last of the request logged through `unique Ping`
- */

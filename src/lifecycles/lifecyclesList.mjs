@@ -7,7 +7,7 @@
  */
 /**
  * @template {lifecyclesList} T
-  * @template {boolean} B
+ * @template {boolean} B
  * @param {T} lifecycleName
  * @param {B} [bypasWaitOnViewToRender]
  * @returns {`vorth='${T}${B extends true ? ';pre' : ''}'`}
