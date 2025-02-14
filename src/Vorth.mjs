@@ -216,14 +216,6 @@ export class Vorth {
 	 */
 	static storageKey = (relativePath) => `vorth-data-${relativePath}`;
 	/**
-	 * @param {import('vorth/src/data/dataList.mjs').dataList} relativePath
-	 * @param {vorthLifecycleOptions} [vorthLifecycleOptions]
-	 * - auto filled by Vorth, keep it unfilled!!!;
-	 * @returns {Promise<Let|false>}
-	 */
-	static importData = async (relativePath, vorthLifecycleOptions) =>
-		await importData(relativePath, vorthLifecycleOptions);
-	/**
 	 * @param {Object} a0
 	 * @param {import('vorth/src/data/dataList.mjs').dataList} a0.dataName
 	 * - Let<Array<{[key:string]:string}>>;
@@ -237,7 +229,7 @@ export class Vorth {
 	 * @param {()=>Promise<void>} [a0.afterLoopCallback]
 	 * - callback to be run when all children receives values from the signal, even if there are any children yet to be rendered;
 	 * - if `undefined`, it will use this current lifecycle element;
-	 * @param {vorthLifecycleOptions} [a0.vorth]
+	 * @param {vorthLifecycleOptions} [a0._]
 	 * - auto filled by Vorth, keep it unfilled!!!;
 	 * @returns {Promise<void>}
 	 */
@@ -247,7 +239,7 @@ export class Vorth {
 		element,
 		waitForOnViewToRender = true,
 		afterLoopCallback = undefined,
-		vorth = undefined,
+		_ = undefined,
 	}) => {
 		const child = element.firstElementChild;
 
@@ -260,7 +252,7 @@ export class Vorth {
 			Vorth.namespace,
 			waitForOnViewToRender ? `${childLifescycle};${Vorth.pre}` : childLifescycle
 		);
-		const signal = await importData(dataName, vorth);
+		const signal = await importData(dataName, _);
 		new $(async () => {
 			const data_s = signal.value;
 			const children = element.children;
@@ -303,15 +295,15 @@ export class Vorth {
 	 * @template {import('vorth/src/data/dataList.mjs').dataList} dataList
 	 * @param {dataList} [dataName]
 	 * - this pramater is purely for IDE typechecking, and won't affect the script in any ways;
-	 * @param {HTMLElement} [element]
+	 * @param {HTMLElement} [__]
 	 * - auto filled by Vorth, keep it unfilled!!!;
-	 * @param {Array<Let|false>} [signals]
+	 * @param {Array<Let|false>} [___]
 	 * - auto filled by Vorth, keep it unfilled!!!;
 	 * @returns {{index:number, value:Awaited<ReturnType<import('vorth/src/data/dataList.mjs').importData<dataList>>>["value"][0]}|false}
 	 */
-	static of = (dataName, element, signals) => {
-		const data_ = Vorth.looped.get(element);
-		signals.push(data_.signal);
+	static of = (dataName, __, ___) => {
+		const data_ = Vorth.looped.get(__);
+		___.push(data_.signal);
 		return {
 			get value() {
 				return data_.signal.value;
@@ -336,14 +328,17 @@ export class Vorth {
 		return effect_;
 	};
 	/**
-	 * @template {anyButUndefined} V
+	 * @template V
 	 * @param {{dataOnly:()=>Promise<V>}|{attr:string, data:()=>Promise<V>}} obj
-	 * @param {HTMLElement} [element]
-	 * @param {Array<Derived<V>|false>} [signals]
-	 * @param {Array<$>} [effects]
+	 * @param {HTMLElement} [_]
+	 * - auto filled by Vorth, keep
+	 * @param {Array<Derived<V>|false>} [__]
+	 * - auto filled by Vorth, keep
+	 * @param {Array<$>} [___]
+	 * - auto filled by Vorth, keep
 	 * @returns {Omit<Derived<V>, 'subscriptions'>}
 	 */
-	static derived = (obj, element, signals, effects) => {
+	static derived = (obj, _, __, ___) => {
 		/**
 		 * @type {Derived}
 		 */
@@ -353,24 +348,27 @@ export class Vorth {
 		} else {
 			const { attr, data } = obj;
 			signal = new Derived(data, attr, {
-				documentScope: element,
+				documentScope: _,
 			});
 			Vorth.$(async () => {
-				Let.domReflector(signal.value, attr, element, signal);
-			}, effects);
+				Let.domReflector(signal.value, attr, _, signal);
+			}, ___);
 		}
-		signals.push(signal);
+		__.push(signal);
 		return signal;
 	};
 	/**
-	 * @template {anyButUndefined} V
+	 * @template V
 	 * @param {{dataOnly:V}|{attr:string, data:V}} obj
-	 * @param {HTMLElement} [element]
-	 * @param {Array<Let<V>|false>} [signals]
-	 * @param {Array<$>} [effects]
-	 * @returns {Let<V>}
+	 * @param {HTMLElement} [_]
+	 * - auto filled by Vorth, keep
+	 * @param {Array<Let<V>|false>} [__]
+	 * - auto filled by Vorth, keep
+	 * @param {Array<$>} [___]
+	 * - auto filled by Vorth, keep
+	 * @returns {Omit<Let<V>, 'subscriptions'>}}
 	 */
-	static let = (obj, element, signals, effects) => {
+	static let = (obj, _, __, ___) => {
 		/**
 		 * @type {Let}
 		 */
@@ -380,13 +378,13 @@ export class Vorth {
 		} else {
 			const { attr, data } = obj;
 			signal = new Let(data, attr, {
-				documentScope: element,
+				documentScope: _,
 			});
 			Vorth.$(async () => {
-				Let.domReflector(signal.value, attr, element, signal);
-			}, effects);
+				Let.domReflector(signal.value, attr, _, signal);
+			}, ___);
 		}
-		signals.push(signal);
+		__.push(signal);
 		return signal;
 	};
 	/**
@@ -539,7 +537,7 @@ export class Vorth {
 			importWorker,
 			on: new on(element, onDisconnected).on,
 			// @ts-ignore
-			importData: async (relativePath) => await Vorth.importData(relativePath, vorth),
+			importData: async (relativePath) => await importData(relativePath, vorth),
 			select: (attributeName, options) => select(attributeName, options, element, false),
 			attr: ({ on, domReflect, lifecycle, waitForOnViewToRender = true }) =>
 				select(
@@ -556,12 +554,11 @@ export class Vorth {
 			},
 			$: (effect) => Vorth.$(effect, effects),
 			for_: {
-				data: async (options) => await Vorth.for({ element, ...options, vorth }),
+				data: async (options) => await Vorth.for({ element, ...options, _: vorth }),
 				of: (_ = undefined) => {
 					return Vorth.of(_, element, signals);
 				},
 			},
-			// @ts-ignore
 			let_: (obj) => Vorth.let(obj, element, signals, effects),
 			// @ts-ignore
 			derived: (obj) => Vorth.derived(obj, element, signals, effects),

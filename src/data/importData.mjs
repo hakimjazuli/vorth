@@ -9,11 +9,11 @@ import { importWorker } from '../workers/importWorker.mjs';
  * @template {import('vorth/src/data/dataList.mjs').dataList} T
  * @param {T} relativePath
  * - relativePath of data inside `data`;
- * @param {import('../lifecycles/vorthLifecycle.mjs').vorthLifecycleOptions} [vorth]
+ * @param {import('../lifecycles/vorthLifecycle.mjs').vorthLifecycleOptions} [_]
  * - auto filled by Vorth, keep it unfilled!!!;
  * @returns {ReturnType<import('vorth/src/data/dataList.mjs').importData<T>>}
  */
-export const importData = async (relativePath, vorth) => {
+export const importData = async (relativePath, _) => {
 	const { resume } = await Q.unique(`importData-${relativePath}`);
 	const { pathData, cacheDate, cacheDateName, cachedLet } = Vorth;
 	const storageKey = Vorth.storageKey;
@@ -76,12 +76,12 @@ export const importData = async (relativePath, vorth) => {
 				qFIFO: Q.fifo,
 				qUnique: Q.unique,
 				// @ts-ignore
-				importData: async (relativePath) => await importData(relativePath, vorth),
+				importData: async (relativePath) => await importData(relativePath, _),
 				// @ts-ignore
 				importLib: async (relativePath) => {
 					const lib = await importLib(relativePath);
 					// @ts-ignore
-					return (...params) => lib.call(vorth, ...params);
+					return (...params) => lib.call(_, ...params);
 				},
 				importWorker: async (relativePath) => await importWorker(relativePath, true),
 			});

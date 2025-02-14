@@ -5,7 +5,6 @@
  * @typedef {import('vorth/src/workers/workersList.mjs').workersList} workersList
  * @typedef {import('vorth/src/data/dataList.mjs').dataList} dataList
  * @typedef {import('vorth/src/libs/libsList.mjs').libsList} libsList
- * @typedef {Record<string, any>|Array|string|number|boolean} returnOfSignal
  * @typedef {(isAtInitialization:boolean)=>Promise<void>} effectCallback
  * @typedef {typeof import('../Vorth.mjs').Vorth} Vorth
  * @typedef {typeof import('./select.mjs').$__} $__
@@ -134,12 +133,13 @@ export const lifecycle = async (vorth) => {
 		},
 	});
 	{
-		const { attr, call$, remove$, removeAll$, unRef, value } = derived({
+		let { attr, call$, remove$, removeAll$, unRef, value } = derived({
 			attr: '',
 			async data() {
 				return '';
 			},
 		});
+		value = '';
 	}
 	{
 		const { attr, call$, remove$, removeAll$, unRef, value } = derived({
@@ -155,25 +155,29 @@ export const lifecycle = async (vorth) => {
 		waitForOnViewToRender: true,
 		async afterLoopCallback() {},
 	});
-	html`<div>hehe</div>`.inner();
-	html`<div>hehe</div>`.string;
+	{
+		const { inner, string } = html`<div>hehe</div>`;
+	}
 	{
 		const { attr, call$, remove$, removeAll$, unRef, value } = await importData('count');
 	}
 	{
 		const { attr, call$, remove$, removeAll$, unRef, value } = await importData('derived');
 	}
-	const log_ = await importLib('log');
-	log_({ a: '', b: 0 });
-	const { postMessage, resultSignal } = await importWorker('test');
 	{
+		const log_ = await importLib('log');
+		log_({ a: '', b: 0 });
+	}
+	{
+		const { postMessage, resultSignal } = await importWorker('test');
 		const { value } = resultSignal;
 	}
 	{
-		const { attr, call$, remove$, removeAll$, unRef, value } = let_({
+		const a = let_({
 			attr: '',
 			data: '',
 		});
+		a.value = 'aaerear';
 	}
 	{
 		const { attr, call$, remove$, removeAll$, unRef, value } = let_({

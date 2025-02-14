@@ -4,13 +4,13 @@ import { Vorth } from '../Vorth.mjs';
 
 /**
  * @param {(isAtInitialization:boolean)=>Promise<void>} effect
- * @param {Array<$_>} [effects]
+ * @param {Array<$_>} [_]
  * - auto filled by Vorth, keep it unfilled!!!;
  * @returns {$_}
  */
-export const $__ = (effect, effects = []) => {
+export const $__ = (effect, _ = []) => {
 	const effect_ = new $_(effect);
-	effects.push(effect_);
+	_.push(effect_);
 	return effect_;
 };
 /**
@@ -24,9 +24,9 @@ export const $__ = (effect, effects = []) => {
  * @param {()=>Promise<import('../Vorth.mjs').anyButUndefined>} [a0.domReflect]
  * @param {boolean} [a0.waitForOnViewToRender]
  * @param {boolean} [a0.isGlobal]
- * @param {import('virst').documentScope} [documentScope]
+ * @param {import('virst').documentScope} [_] documentScope
  * - auto filled by Vorth, keep it unfilled!!!;
- * @param {boolean} [singleUse]
+ * @param {boolean} [__] singleUse
  * - auto filled by Vorth, keep it unfilled!!!;
  * @returns {{attr:string}}
  */
@@ -39,12 +39,12 @@ export const select = (
 		lifecycle = undefined,
 		waitForOnViewToRender = true,
 	},
-	documentScope,
-	singleUse = false
+	_,
+	__ = false
 ) => {
 	new Lifecycle({
 		attr: attributeName,
-		documentScope: isGlobal ? document : documentScope,
+		documentScope: isGlobal ? document : _,
 		onConnected: async ({
 			element,
 			onDisconnected,
@@ -65,7 +65,7 @@ export const select = (
 					Vorth.derived(
 						{ attr: attributeName, data: domReflect },
 						// @ts-expect-error
-						documentScope,
+						_,
 						signals,
 						effects
 					);
@@ -80,12 +80,12 @@ export const select = (
 						 * @type {typeof Vorth["let"]}
 						 */
 						// @ts-expect-error
-						let_: (obj) => Vorth.let(obj, documentScope, signals, effects),
+						let_: (obj) => Vorth.let(obj, _, signals, effects),
 						/**
 						 * @type {typeof Vorth["derived"]}
 						 */
 						// @ts-expect-error
-						derived: (obj) => Vorth.derived(obj, documentScope, signals, effects),
+						derived: (obj) => Vorth.derived(obj, _, signals, effects),
 						onAttributeChanged,
 						onDisconnected,
 					});
@@ -102,7 +102,7 @@ export const select = (
 							effect.remove$();
 						}
 					}
-					if (singleUse) {
+					if (__) {
 						lifecycleObserver.disconnect();
 					}
 				});

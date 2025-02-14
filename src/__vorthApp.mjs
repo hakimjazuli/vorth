@@ -293,7 +293,7 @@ export const lifecycleAttr = (lifecycleName, bypasWaitOnViewToRender = false) =>
  * @callback importData
  * @param {T} relativePath
  * - relativePath of data inside \`data\`;
- * @param {import('../lifecycles/vorthLifecycle.mjs').vorthLifecycleOptions} [vorth]
+ * @param {import('../lifecycles/vorthLifecycle.mjs').vorthLifecycleOptions} [_]
  * - auto filled by Vorth, keep it unfilled!!!;
  * @returns {Promise<${extender.join(':')}>}
  */`;
