@@ -336,7 +336,7 @@ export class Vorth {
 	 * - auto filled by Vorth, keep
 	 * @param {Array<$>} [___]
 	 * - auto filled by Vorth, keep
-	 * @returns {Omit<Derived<V>, 'subscriptions'>}
+	 * @returns {Derived<V>}
 	 */
 	static derived = (obj, _, __, ___) => {
 		/**
@@ -366,7 +366,7 @@ export class Vorth {
 	 * - auto filled by Vorth, keep
 	 * @param {Array<$>} [___]
 	 * - auto filled by Vorth, keep
-	 * @returns {Omit<Let<V>, 'subscriptions'>}}
+	 * @returns {Let<V>}}
 	 */
 	static let = (obj, _, __, ___) => {
 		/**
