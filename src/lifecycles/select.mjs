@@ -14,14 +14,11 @@ export const $__ = (effect, _ = []) => {
 	return effect_;
 };
 /**
- * @typedef {{[K in keyof HTMLElementEventMap]? :{listener:(this: HTMLElement, ev: HTMLElementEventMap[K])=> void, options?:{onAdd?:boolean|AddEventListenerOptions, onRemove?:boolean|EventListenerOptions}}}} selectArg_On
- */
-/**
  * @param {string} attributeName
  * @param {Object} a0
- * @param {selectArg_On} [a0.on]
+ * @param {import('vorth').selectArg_On} [a0.on]
  * @param {(this: HTMLElement, options:{$:typeof $__, let_:typeof Vorth["let"], derived:typeof Vorth["derived"], onAttributeChanged:(arg0:import('virst').attributeChangedLifecycle)=>void, onDisconnected:(arg0:()=>Promise<void>)=>void})=>Promise<void>} [a0.lifecycle]
- * @param {()=>Promise<import('../Vorth.mjs').anyButUndefined>} [a0.domReflect]
+ * @param {()=>Promise<import('vorth').anyButUndefined>} [a0.domReflect]
  * @param {boolean} [a0.waitForOnViewToRender]
  * @param {boolean} [a0.isGlobal]
  * @param {import('virst').documentScope} [_] documentScope

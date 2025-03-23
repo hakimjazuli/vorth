@@ -9,10 +9,11 @@ import { select } from './lifecycles/select.mjs';
 import { on } from './lifecycles/on.mjs';
 
 /**
- * @typedef {(onViewCallback: import('virst').onViewPortHandler['onViewPort']) => import('virst').onViewPort} onViewPortCallback
- * @typedef {{}|null|number|string|boolean|symbol|bigint|function} anyButUndefined
- * @typedef {'vorth'} VorthNamespace
- * @typedef {'domReflect'} VorthDomReflect
+ * @typedef {import('./sharedTypes.type.mjs').onViewPortCallback} onViewPortCallback
+ * @typedef {import('./sharedTypes.type.mjs').anyButUndefined} anyButUndefined
+ * @typedef {import('./sharedTypes.type.mjs').VorthNamespace} VorthNamespace
+ * @typedef {import('./sharedTypes.type.mjs').VorthDomReflect} VorthDomReflect
+ * @typedef {import('./sharedTypes.type.mjs').vorthLifecycleOptions} vorthLifecycleOptions
  */
 /**
  * @description
@@ -495,9 +496,6 @@ export class Vorth {
 		element.outerHTML = copy.outerHTML;
 	};
 	/**
-	 * @typedef {import('./lifecycles/vorthLifecycle.mjs').vorthLifecycleOptions} vorthLifecycleOptions
-	 * @typedef {import('./lifecycles/vorthLifecycle.mjs').onViewCallbackOptions} onViewCallbackOptions
-	 * @typedef {import('./lifecycles/vorthLifecycle.mjs').onViewPortInstance} onViewPortInstance
 	 * @private
 	 * @param {string} path_
 	 * @param {HTMLElement} element

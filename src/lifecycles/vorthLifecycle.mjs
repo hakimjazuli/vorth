@@ -13,7 +13,7 @@
  * @typedef {Object} vorthLifecycleOptions
  * @property {(effect:effectCallback)=>$Instance} $
  * - to create `effect` on data changes;
- * @property {(options:{domReflect?:()=>Promise<import('../Vorth.mjs').anyButUndefined>, lifecycle?:(this: HTMLElement, options:{$:$__, let_:Vorth["let"], derived:Vorth["derived"], onAttributeChanged:(arg0:import('virst').attributeChangedLifecycle)=>void, onDisconnected:(arg0:()=>Promise<void>)=>void})=>Promise<void>, on?:import('./select.mjs').selectArg_On, waitForOnViewToRender?:boolean})=>string} attr
+ * @property {(options:{domReflect?:()=>Promise<import('vorth').anyButUndefined>, lifecycle?:(this: HTMLElement, options:{$:$__, let_:Vorth["let"], derived:Vorth["derived"], onAttributeChanged:(arg0:import('virst').attributeChangedLifecycle)=>void, onDisconnected:(arg0:()=>Promise<void>)=>void})=>Promise<void>, on?:import('vorth').selectArg_On, waitForOnViewToRender?:boolean})=>string} attr
  * - best practice to add events and effects element for vorth;
  * @property {Vorth["derived"]} derived
  * - dataOnly?: reactive signal withou `DOM`;
@@ -56,7 +56,7 @@
  * - best practice to select multiple elements to attach events and lifecycle to them;
  * @property {Vorth["triggerLifecycle"]} triggerLifecycle
  * - manually trigger lifecycle on an element;
- * @property {import('../Vorth.mjs').onViewPortCallback} onViewPort
+ * @property {import('vorth').onViewPortCallback} onViewPort
  * - onViewPort helper for current element lifecycle;
  */
 /**

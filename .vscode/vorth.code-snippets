@@ -39,7 +39,7 @@
 			"// @ts-check",
 			"",
 			"/**",
-			"* @type {import('vorth')..vorthData<${1:isDerived?}, ${2:signalValueType}>}",
+			"* @type {import('vorth').vorthData<${1:isDerived?}, ${2:signalValueType}>}",
 			"*/",
 			"export const data = ${0:}"
 		],
@@ -51,7 +51,7 @@
 		"body": [
 			"import type { vorthData } from 'vorth';",
 			"",
-			"export const data: vorthData<${1:isDerived?}, ${2:signalValueType}> =${0:}"
+			"export const data: vorthData<${1:isDerived?}, ${2:signalValueType}> = ${0:}"
 		],
 		"description": "tsVorthData"
 	},
@@ -93,7 +93,7 @@
 		"body": [
 			"// @ts-check",
 			"/**",
-			"* @type {import('vorth')..vorthLib<(${1:...argumentsTypes})=>Promise<${3:returnType}>>}",
+			"* @type {import('vorth').vorthLib<(${1:...argumentsTypes})=>Promise<${3:returnType}>>}",
 			"*/",
 			"export const lib = async (",
 			"{${4:...vorthOptions}},",
@@ -217,11 +217,11 @@
 		"body": [
 			"// @ts-check",
 			"/**",
-			"* @type {import('vorth').vorthLifecycle = async ({${1:...vorthLifecycleOptions}})}",
+			"* @type {import('vorth').vorthLifecycle}",
 			"*/",
-			"export const lifecycle => {",
-			"\t${0:// code}",
-			"};"
+			"export const lifecycle = async ({${1:...vorthLifecycleOptions}}) => {",
+			"\t",
+			"}"
 		],
 		"description": "VorthLifecycle"
 	},

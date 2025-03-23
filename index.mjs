@@ -77,5 +77,14 @@ export { __vorthApp } from './src//__vorthApp.mjs';
  * @typedef {import('./src/lifecycles/vorthLifecycle.mjs').vorthLifecycle} vorthLifecycle
  */
 /**
+ * @typedef {Object} shadredTypes
+ * @typedef {(onViewCallback: import('virst').onViewPortHandler['onViewPort']) => import('virst').onViewPort} onViewPortCallback
+ * @typedef {{}|null|number|string|boolean|symbol|bigint|function} anyButUndefined
+ * @typedef {'vorth'} VorthNamespace
+ * @typedef {'domReflect'} VorthDomReflect
+ * @typedef {import('./src//lifecycles/vorthLifecycle.mjs').vorthLifecycleOptions} vorthLifecycleOptions
+ * @typedef {{[K in keyof HTMLElementEventMap]? :{listener:(this: HTMLElement, ev: HTMLElementEventMap[K])=> void, options?:{onAdd?:boolean|AddEventListenerOptions, onRemove?:boolean|EventListenerOptions}}}} selectArg_On
+ */
+/**
  * @typedef {import('vorth/src/workers/workersList.mjs').workersList} workersList
  */
