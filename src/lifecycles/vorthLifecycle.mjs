@@ -34,7 +34,7 @@
  * - typesafe import for data;
  * @property {import('../libs/importLib.mjs').importLib} importLib
  * - typesafe import for libs;
- * @property {(a0:Parameters<import('vorth/src/workers/importWorker.mjs').importWorker>[0])=>Promise<{resultSignal:{value:MessageEvent}, postMessage:(message: any, options?: StructuredSerializeOptions)=>void}>} importWorker
+ * @property {typeof import('vorth/src/workers/importWorker.mjs').importWorker} importWorker
  * - typesafe import for data;
  * @property {Vorth["let"]} let_
  * - dataOnly?: reactive signla withou `DOM`;

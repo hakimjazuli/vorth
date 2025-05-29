@@ -10,5 +10,5 @@
  * @callback importLib
  * @param {T} relativePath
  * - relativePath of lib inside `libs`;
- * @returns {Promise<T extends 'log_'?(options: { a: string; b: number })=>Promise<void>:T extends 'log'?(options:{a:string, b:number})=>Promise<void>:void>}
+ * @returns {Promise<T extends 'log_'?(options: { a: string, b: number })=>Promise<void>:T extends 'log'?(options:{a:string, b:number})=>Promise<void>:void>}
  */

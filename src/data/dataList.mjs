@@ -10,7 +10,7 @@
  * @callback importData
  * @param {T} relativePath
  * - relativePath of data inside `data`;
- * @param {import('../lifecycles/vorthLifecycle.mjs').vorthLifecycleOptions} [_]
+ * @param {import('vorth').vorthLifecycleOptions} [_]
  * - auto filled by Vorth, keep it unfilled!!!;
- * @returns {Promise<T extends 'loop'?import('virst').Let<{a:string,b:string}[]>:T extends 'let_'?import('virst').Let<string>:T extends 'derived'?import('virst').Derived<string>:T extends 'count_'?import('virst').Let<number>:T extends 'count'?import('virst').Let<number>:void>}
+ * @returns {Promise<T extends 'loop'?import('virst').Let< {a:string, b:string}[]>:T extends 'let_'?import('virst').Let< string>:T extends 'derived'?import('virst').Derived< string>:T extends 'count_'?import('virst').Let< number>:T extends 'count'?import('virst').Let< number>:void>}
  */

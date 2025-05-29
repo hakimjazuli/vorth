@@ -3,5 +3,20 @@
  */
 // @ts-check
 /**
- * @typedef {'test'} workersList
+ * @typedef {'test'|'test_'} workersList
+ */
+/**
+ * @template {workersList} T
+ */
+/**
+ * @template {workersList} T
+ * @callback workerType
+ * @param {T} relativePath
+ * - relativePath of worker inside `workers`;
+ * @returns {T extends'test_'?vorthWorker<{mainThreadSays:string},{theTestWorkerSays:string}>:T extends'test'?vorthWorker<{mainThreadSays:string},{theTestWorkerSays:string}>:void}
+ */
+/**
+ * @template receiveMainThread
+ * @template postWorkerThread
+ * @typedef {import('./vorthWorker.type.mjs').vorthWorker<receiveMainThread, postWorkerThread>} vorthWorker
  */

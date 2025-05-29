@@ -17,30 +17,6 @@ import {
 import { join, basename, extname } from 'path';
 import { _Queue, _QueueFIFO, _QueueObject, _QueueObjectFIFO } from '@html_first/simple_queue';
 
-/**
- * @description
- * - for developer who want to add external modules from package managers;
- * - install using npm to install `.vscode`, `snippets` and `starter project`;
- * ```shell
- * npm install vorth
- * ```
- * - you'll then have this folder structure
- * >- `.vscode`
- * >- `node_modules`
- * >- `vorth`
- * >>- `dev`
- * >>>- `index.mjs`: `directory watcher`
- * >>- `src`
- * >>>- `data`
- * >>>- `libs`
- * >>>- `lifecycles`
- * >>>- `workers`
- * - modify `directory watcher` the `index.mjs` to suit your setting;
- * - run `index.mjs` to start develop your <b>`vorth`</b> code;
- * 	- <b>`vorth`</b> detects `.mjs`, `.ts`, and `.mts` extentions inside `src` directory, and bundles them to `targetPath` `1 to 1` it have to be in `esm`;
- * 	- all static imports will be bundled;
- * check at [Vorth](#vorth) for `property control`;
- */
 export class __vorthApp {
 	/**
 	 * @typedef {import('fs').Dirent} Dirent
@@ -51,12 +27,9 @@ export class __vorthApp {
 	 */
 	static __;
 	/**
-	 * @param {Object} arg0
-	 * @param {string} arg0.sourcePath
-	 * @param {string} arg0.targetPath
-	 * @param {boolean} [arg0.minify]
+	 * @param {import('./__vorthConfig.mjs').__vorthConfig} __vorthConfig
 	 */
-	constructor({ sourcePath, targetPath, minify = true }) {
+	constructor(__vorthConfig) {
 		if (__vorthApp.__ instanceof __vorthApp) {
 			console.warn({
 				singleton: '`__vorthApp` is a singleton class',
@@ -64,6 +37,7 @@ export class __vorthApp {
 			});
 			return __vorthApp.__;
 		}
+		const { sourcePath, targetPath, minify } = __vorthConfig;
 		__vorthApp.minify = minify;
 		__vorthApp.plugins = minify ? [__vorthApp.cleanHTML()] : [];
 		__vorthApp.basePath = process.cwd();
@@ -72,19 +46,18 @@ export class __vorthApp {
 		__vorthApp.watcher = chokidar.watch(__vorthApp.sourcePath);
 		__vorthApp.resolvedCorePath = realpathSync(fileURLToPath(new URL('./', import.meta.url)));
 		__vorthApp.cleanupTarget();
-		__vorthApp.bundleVorthMain();
 		__vorthApp.watcher
 			.on('add', (path_, stats) => {
-				__vorthApp.handler(path_, stats, false, true);
+				__vorthApp.handler(path_, stats, false);
 			})
 			.on('change', (path_, stats) => {
 				__vorthApp.handler(path_, stats, false);
 			})
 			.on('unlink', (path_, stats) => {
-				__vorthApp.handler(path_, stats, 'file', true);
+				__vorthApp.handler(path_, stats, 'file');
 			})
 			.on('unlinkDir', (path_, stats) => {
-				__vorthApp.handler(path_, stats, 'dir', true);
+				__vorthApp.handler(path_, stats, 'dir');
 			});
 	}
 	/**
@@ -177,15 +150,22 @@ export class __vorthApp {
 		return fileList;
 	};
 	/**
+	 * @param {import('fs').PathLike} fullPath
+	 * @param {RegExp} regex
+	 * @returns {RegExpMatchArray | null}
+	 */
+	static getFileContentWithRegex = (fullPath, regex) =>
+		readFileSync(fullPath, { encoding: 'utf-8' }).match(regex);
+	/**
 	 * @private
 	 * @param {string} path_
 	 * @param {import('fs').Stats} [_]
 	 */
 	static generateType = async (path_, _) => {
 		const relative = path_.replace(this.sourcePath, '').replace(/\//g, '\\').split('\\');
-		relative.shift();
-		let typeof_;
+		let typeof_ = '';
 		const typeof__ = relative[0];
+		relative.shift();
 		switch (typeof__) {
 			case 'workers':
 			case 'libs':
@@ -206,13 +186,16 @@ export class __vorthApp {
 					const folder_ = join(this.sourcePath, typeof_);
 					const files_ = this.readFilesNestedSync(folder_);
 					const listName = [];
+					const fileNames = [];
 					for (let i = 0; i < files_.length; i++) {
 						const file__ = files_[i];
+						const fileName = join(file__.parentPath, file__.name).replace(/\\/g, '/');
+						fileNames.push(fileName);
 						listName.push(
-							join(file__.parentPath.replace(this.sourcePath, ''), file__.name)
-								.replace('\\', '')
-								.replace(/\\/g, '/')
-								.replace(`${typeof_}/`, '')
+							fileName
+								.replace(this.sourcePath.replace(/\\/g, '/'), '')
+								.replace('/', '')
+								.replace(typeof_, '')
 								.replace(extname(file__.name), '')
 						);
 					}
@@ -227,62 +210,16 @@ export class __vorthApp {
 /**
  * @template {${fileBaseName}} T`;
 					switch (typeof__) {
-						case 'lifecycles':
-							modifiedContent = `${modifiedContent}
- * @template {boolean} B
- * @param {T} lifecycleName
- * @param {B} [bypasWaitOnViewToRender]
- * @returns {\`vorth='\${T}\${B extends true ? ';pre' : ''}'\`}
- */
-// @ts-expect-error
-export const lifecycleAttr = (lifecycleName, bypasWaitOnViewToRender = false) => {
-	const pre = bypasWaitOnViewToRender ? ';pre' : '';
-	// @ts-expect-error
-	return \`vorth='\${lifecycleName}\${pre}'\`;
-};`;
-							break;
-						case 'workers':
-							modifiedContent = `${modifiedContent}
- */`.replace(
-								`/**
- * @template {workersList} T
- */`,
-								''
-							);
-							break;
-						case 'libs':
-							{
-								const extender = ['void'];
-								for (let i = 0; i < listName.length; i++) {
-									const file_ = files_[i];
-									const fullPath = join(file_.parentPath, file_.name);
-									const regex = /vorthLib<\(([^)]+)\)\s*=>\s*Promise\s*<([^>]+)>/s;
-									const [_, args, awaitedReturnType] = readFileSync(fullPath, {
-										encoding: 'utf-8',
-									}).match(regex);
-									const name = listName[i];
-									extender.unshift(`T extends '${name}'?(${args})=>Promise<${awaitedReturnType}>`);
-								}
-								modifiedContent = `${modifiedContent}
- * @callback importLib
- * @param {T} relativePath
- * - relativePath of lib inside \`libs\`;
- * @returns {Promise<${extender.join(':')}>}
- */`;
-							}
-							break;
 						case 'data':
 							{
 								const extender = ['void'];
-								for (let i = 0; i < listName.length; i++) {
-									const file_ = files_[i];
-									const fullPath = join(file_.parentPath, file_.name);
-									const regex = /vorthData<(.+?),(.+?)>/s;
-									const [_, isDerived, dataType] = readFileSync(fullPath, {
-										encoding: 'utf-8',
-									}).match(regex);
+								for (let i = 0; i < fileNames.length; i++) {
+									const [_, isDerived, dataType] = this.getFileContentWithRegex(
+										fileNames[i],
+										/vorthData<(.+?),(.+?)>/s
+									);
 									const name = listName[i];
-									const dataType_ = dataType.replace(/\s+/g, '');
+									const dataType_ = __vorthApp.tsToJsType(dataType);
 									const mode =
 										isDerived === 'true'
 											? `import('virst').Derived<${dataType_}>`
@@ -299,12 +236,101 @@ export const lifecycleAttr = (lifecycleName, bypasWaitOnViewToRender = false) =>
  */`;
 							}
 							break;
+						case 'libs':
+							{
+								const extender = ['void'];
+								for (let i = 0; i < fileNames.length; i++) {
+									const [_, args, awaitedReturnType] = this.getFileContentWithRegex(
+										fileNames[i],
+										/vorthLib<\s*\(([^)]+)\)\s*=>\s*Promise\s*<([^>]+)>/m
+									);
+									const name = listName[i];
+									extender.unshift(
+										`T extends '${name}'?(${__vorthApp.tsToJsType(
+											args
+										)})=>Promise<${__vorthApp.tsToJsType(awaitedReturnType)}>`
+									);
+								}
+								modifiedContent = `${modifiedContent}
+ * @callback importLib
+ * @param {T} relativePath
+ * - relativePath of lib inside \`libs\`;
+ * @returns {Promise<${extender.join(':')}>}
+ */`;
+							}
+							break;
+						case 'lifecycles':
+							modifiedContent = `${modifiedContent}
+ * @template {boolean} B
+ * @param {T} lifecycleName
+ * @param {B} [bypasWaitOnViewToRender]
+ * @returns {\`vorth='\${T}\${B extends true ? ';pre' : ''}'\`}
+ */
+// @ts-expect-error
+export const lifecycleAttr = (lifecycleName, bypasWaitOnViewToRender = false) => {
+	const pre = bypasWaitOnViewToRender ? ';pre' : '';
+	// @ts-expect-error
+	return \`vorth='\${lifecycleName}\${pre}'\`;
+};`;
+							break;
+						case 'workers':
+							{
+								let lists = ['void'];
+								for (let i = 0; i < listName.length; i++) {
+									const matches = this.getFileContentWithRegex(
+										fileNames[i],
+										/type\s+(receive|post)\s*=\s*([\[{][\s\S]*?[\]}]);|@typedef\s+\{\{([^}]+)\}\}\s+(receive|post)|@typedef\s+\{([^}]+)\}\s+(receive|post)/gm
+									);
+									const typeOfWorker = {
+										receive: '',
+										post: '',
+									};
+									matches
+										.map((line) => {
+											line = line.replace(/\s/g, ' ').replace(/;/gm, ',') + ';';
+											const match =
+												/@typedef\s+\{\{(.+?)\}\}\s+(receive|post)|@typedef\s+\{(.+?)\}\s+(receive|post)|type\s+(receive|post)\s*=\s*(.+?);/.exec(
+													__vorthApp.tsToJsType(line) + ';'
+												);
+											if (!match) return null;
+											let name = match[2] || match[4] || match[5];
+											let type = match[1] ? `{${match[1]}}` : match[3] || match[6];
+											if (name in typeOfWorker) {
+												typeOfWorker[name] = type.replace(/\s/g, '');
+											}
+										})
+										.filter(Boolean);
+									lists.unshift(
+										`T extends'${listName[i]}'?vorthWorker<${typeOfWorker.receive},${typeOfWorker.post}>`
+									);
+								}
+
+								const extender = lists.join(':');
+								modifiedContent = `${modifiedContent}
+ */
+/**
+ * @template {${fileBaseName}} T
+ * @callback workerType
+ * @param {T} relativePath
+ * - relativePath of worker inside \`workers\`;
+ * @returns {${extender}}
+ */
+/**
+ * @template receiveMainThread
+ * @template postWorkerThread
+ * @typedef {import('./vorthWorker.type.mjs').vorthWorker<receiveMainThread, postWorkerThread>} vorthWorker
+ */`;
+							}
+							break;
 					}
-					writeFileSync(file_, modifiedContent, 'utf-8');
-					console.log({
-						message: `succesfully assign types of ${typeof_}`,
-						file_,
-					});
+					if (__vorthApp.mappedTypes.get(file_) !== modifiedContent) {
+						__vorthApp.mappedTypes.set(file_, modifiedContent);
+						writeFileSync(file_, modifiedContent, 'utf-8');
+						console.log({
+							message: `succesfully assign types of ${typeof_}`,
+							file_,
+						});
+					}
 				},
 				100
 			)
@@ -312,21 +338,33 @@ export const lifecycleAttr = (lifecycleName, bypasWaitOnViewToRender = false) =>
 	};
 	/**
 	 * @private
+	 * @param {string} string
+	 * @returns {string}
+	 */
+	static tsToJsType = (string) =>
+		string
+			.replace(/\s+/g, ' ') /** multiple whitespace to single space */
+			.replace(/;/gm, ',') /** typescript Object uses semicolon */
+			.replace(/,+/g, ',') /** multiple comma to comma */
+			.replace(/,(\s*)$/, '$1'); /** delete the last coma */
+	/**
+	 * @private
+	 * @type {Map<string, string>}
+	 */
+	static mappedTypes = new Map();
+	/**
+	 * @private
 	 * @param {string} path_
 	 * @param {import('fs').Stats} [stats]
 	 * @param {unlinkMode|false} [unlink]
-	 * @param {boolean} [isSrcListChanges]
 	 * @returns {void}
 	 */
-	static handler = (path_, stats, unlink = false, isSrcListChanges = false) => {
+	static handler = (path_, stats, unlink = false) => {
 		this.queueFIFOHandler.assign(
 			new _QueueObjectFIFO(async () => {
 				await this.trueBundleAndMinify(path_, unlink);
 			})
 		);
-		if (!isSrcListChanges) {
-			return;
-		}
 		this.generateType(path_, stats);
 	};
 	/**
@@ -382,44 +420,6 @@ export const lifecycleAttr = (lifecycleName, bypasWaitOnViewToRender = false) =>
 				});
 			},
 		};
-	};
-	/**
-	 * @private
-	 */
-	static bundleVorthMain = async () => {
-		this.queueFIFOHandler.assign(
-			new _QueueObjectFIFO(async () => {
-				const fileName = 'vorthInitiator.mjs';
-				const from = join(this.resolvedCorePath, fileName);
-				const to = join(this.target);
-				try {
-					await esbuild.build({
-						entryPoints: [from],
-						outdir: this.target,
-						minify: true,
-						format: 'esm',
-						bundle: true,
-						absWorkingDir: this.basePath,
-						treeShaking: true,
-						outExtension: {
-							'.js': '.mjs',
-						},
-						plugins: this.plugins,
-						banner: {
-							js: `/** @module */`, // Ensures module-level JSDoc is included
-						},
-					});
-					console.log({ message: 'succesfully bundled', from, to });
-				} catch (error) {
-					console.error({
-						...error,
-						message: 'failed to bundle',
-						from,
-						to,
-					});
-				}
-			})
-		);
 	};
 	/**
 	 * @private

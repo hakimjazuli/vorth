@@ -7,6 +7,7 @@ import { importData } from './data/importData.mjs';
 import { importWorker } from './workers/importWorker.mjs';
 import { select } from './lifecycles/select.mjs';
 import { on } from './lifecycles/on.mjs';
+import { shared } from './shared.export.mjs';
 
 /**
  * @typedef {import('./sharedTypes.type.mjs').onViewPortCallback} onViewPortCallback
@@ -17,33 +18,41 @@ import { on } from './lifecycles/on.mjs';
  */
 /**
  * @description
- * if you want to develop it directly in the static endpoint;
- * - download `./initiator.mjs` and `.vscode` from this `git repo` or `npm code`;
- * - load `targetPath/initiator.mjs` to your `html`;
+ * #### how to structure your static file:
+ * - load `targetPath/vorthInitiator.mjs` to your `html`;
  * ```html
- * <script type="module" src="targetPath/initiator.mjs"></script>
+ * <script type="module" src="targetPath/vorthInitiator.mjs"></script>
  * ```
  * - add neccessary attribute to `vorthInitiator.mjs` like `defer`(if you put it in the head tag);
  * - structure your folder:
- * >- targetPath
+ * >- `{targetPath}`
+ * >>- `vorthInitiator.mjs`
  * >>- `data`
  * >>- `libs`
  * >>- `lifecycles`
  * >>- `workers`
- * - use snippet prefixed by <b>`>>static`</b> for quick typehinting and <b>`>>workerThread`</b> are shared snippet;
- * - add `property control` for vorth in the head tag if neccessary;
+ * - use snippet prefixed by <b>`>>`</b>(double `greater than` symbol) for quick typehinting snippets;
+ * >- the snippets structure are templated in a way to generate the types, do not put the types outside the snippets recomended;
+ * - add `property controls` (`content` `attribute`) for vorth in the head tag if neccessary;
  * ```html
  * <meta property="vorth-batch" content="10" />
  * ```
  * >- [`property="vorth-batch"`]: `content` used to tell <b>`vorth`</b> maximum element to be loaded at batch when crossing the `viewPort`;
- * >- you can add `;pre` like this [`vorth="lifecycle/name;pre"`] to bypass this limit;
+ * >- you can add `;pre` like this [`vorth="lifecycle/name;pre"`] to directly process the `element` without waiting for it to cross the `viewPort`;
  * >- `"lifecycle/name"` means you are pointing to `"targetPath/lifecycles/lifecycle/name.mjs"`, this patterns also applied to `importData`, `lifecycleAttr`, `importWorker`, `importLib`, to their respective folder;
  * ```html
  * <meta property="vorth-versionMin" content="1738851920151" />
  * ```
  * >- [`property="vorth-versionMin"`]: `content` used to tell <b>`vorth`</b> minimum `cachedDate` in `unix date ms` is allowed;
  * >- you can dynamically provide this tag from the server, and that will refresh the `cachedDate` of <b>`vorth`</b> code (`managed internally`), while keeping client's session and local storage;
- * - both `property control` are monitored, so when it's changed dynamically in the runtime, <b>`vorth`</b> will reactively apply the new value to it's logic;
+ * - both `property controls` are monitored, so when it's changed dynamically in the runtime, <b>`vorth`</b> will reactively apply the new value to it's logic;
+ * #### how to add the lifecycle handler to html:
+ * ```html
+ * <div vorth="path/fileName"></div>
+ * ```
+ * - this will target `{targetPath}/lifecycles/path/fileName.mjs`;
+ * #### further documentation and examples
+ *	- will be posted in [html-first documentation website](https://html-first.bss.design/)
  */
 export class Vorth {
 	/**
@@ -67,6 +76,7 @@ export class Vorth {
 	/**
 	 * @private
 	 * @type {Record<string, {value:any, onCompare?:(newValue:any)=>void}>}
+	 * the key are used for `property="vorth-${key}"`
 	 */
 	static properties_ = {
 		batch: { value: onViewPort.loadCount },
@@ -93,12 +103,14 @@ export class Vorth {
 			attr: 'property',
 			documentScope: window.document,
 			onConnected: async ({ element, onAttributeChanged }) => {
+				if (!(element instanceof HTMLMetaElement)) {
+					return;
+				}
 				const handler = async () => {
 					const thisProperties_ = Vorth.properties_;
 					for (const property in thisProperties_) {
 						const propertyName = `${namespace}-${property}`;
 						if (
-							!(element instanceof HTMLMetaElement) ||
 							!element.hasAttribute('property') ||
 							!element.hasAttribute('content') ||
 							element.getAttribute('property') !== propertyName
@@ -167,8 +179,10 @@ export class Vorth {
 		return now;
 	}
 	/**
-	 * @type {Map<string, {resultSignal:Let<MessageEvent>, postMessage:WorkerMainThread["postMessage"]}>}
+	 * @template {import('vorth/src/workers/workersList.mjs').workersList} K
+	 * @typedef {Map<K, { resultSignal: Let<MessageEvent>, postMessage: Worker["postMessage"] }>} WorkerCacheType
 	 */
+	/** @type {WorkerCacheType<import('vorth/src/workers/workersList.mjs').workersList>} */
 	static cachedWorker = new Map();
 	/**
 	 * @type {Map<string, Derived|Let>}
@@ -584,6 +598,7 @@ export class Vorth {
 	 * @type {Vorth}
 	 */
 	static _;
+	static paths = shared.paths;
 	constructor() {
 		if (Vorth._ instanceof Vorth) {
 			helper.warningSingleton(Vorth);
