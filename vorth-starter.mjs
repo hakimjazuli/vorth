@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // @ts-check
 
+import { join } from 'path';
 import { xixth } from 'xixth';
 import { shared } from './src/shared.export.mjs';
 
@@ -39,7 +40,7 @@ new xixth({
 		async afterCopy() {
 			const paths = shared.paths;
 			for (const path_ in paths) {
-				this.makeDir(this.generateProjectAbsolutePath(paths[path_]));
+				this.makeDir(this.generateProjectAbsolutePath(join('vorth-src', paths[path_])));
 			}
 		},
 	},
