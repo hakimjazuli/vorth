@@ -22,7 +22,6 @@
 		"virst": "^0.16.3",
 		"xixth": "^0.10.9"
 	},
-	"types": "index.mjs",
 	"bugs": {
 		"url": "https://github.com/hakimjazuli/vorth/issues"
 	},
@@ -47,6 +46,5 @@
 		"vorth-starter": "vorth-starter.mjs",
 		"vorth": "vorth-bundler.mjs"
 	},
-
-
+	"types": "index.mjs"
 }
