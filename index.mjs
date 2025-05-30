@@ -12,8 +12,8 @@
  * >>- less then `10KB` gzipped
  * >- 🎯 declarative;
  * >>- dom reactivity follows this pattern:[`attributeName`="`attributeOrPropertySelector1`;`attributeOrPropertySelector2`;...;`attributeOrPropertySelectorN`"], to reflect and bind the input to the signal value `realtime`;
- * >- `v0.12.x`<strike> 🗜 `prebundled-first` approach;
- * >>- core are already prebuild in this `npm or github` `./vorthInitiator.mjs`;</strike>
+ * >- `v0.12.x`<strike></strike> 🗜 `prebundled-first` approach;
+ * >>- core are already prebuild in this `npm or github` `./vorthInitiator.mjs`;
  * >>- we drop this feature, in order to achieve full typehint support;
  * >- 📃 comprehensive typehint;
  * >>- <b>`vorth`</b> functionality are fully `typehinted`,
@@ -59,10 +59,11 @@
  *  npx vorth-example
  *  ```
  *  - you'll then have this folder structure like this:
- *  >- `.vscode`
- *  >- `vorth.config.mjs`
- *  >- `vorth-src`
- *  >>- `vorthInitiator.mjs`
+ *  >- `.vscode`: snippets collection.
+ *  >- `jsconfig.json`: typehint helper for `.mts` and `.ts` files.
+ *  >- `vorth.config.mjs`: builder config
+ *  >- `vorth-src`: source folder.
+ *  >>- `vorthInitiator.mjs`: <b>`vorth`</b> entry point.
  *  >>- `data`
  *  >>- `libs`
  *  >>- `lifecycles`
@@ -73,7 +74,7 @@
  *  ```shell
  *  npx vorth
  *  ```
- *  >- <b>`vorth`</b> detects `.mjs`, `.ts`, and `.mts` extentions inside `sourcePath` directory, and bundles them to `targetPath` `1 to 1` (it have to be in `esm`);
+ *  >- <b>`vorth`</b> detects `.mjs`, `.ts`, and `.mts` extentions inside `sourcePath` directory, and bundles them to `targetPath` `1 to 1` (it have to be in `esm style`);
  *  >- all static imports will be bundled;
  *  >- due to <b>`vorth`</b> extensively generate types on the fly while also uses custom string generation and only generate `jsdoc`(no `.d.ts`), <b>`vorth`</b> need to put `jsconfig.json` on your project, so if you have any settings for this `compilerOptions` settings will be overwritten
  * ```json
@@ -98,8 +99,8 @@
  * versions
  * >- `v0.11.x`:
  * >>- fixed `onViewPort` bugs;
- * >>- <strike>beta for full release;
- * >>- need to be checked for edge cases;</strike>
+ * >>- <strike>beta for full release;</strike>
+ * >>- <strike>need to be checked for edge cases;</strike>
  * >- `v0.12.x`:
  * >>- drop direct writing on endpoint support, to achieve full typehint on all files;
  * >>- streamlined `install method` and `builder script`;

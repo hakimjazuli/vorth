@@ -5,8 +5,8 @@
 >>- less then `10KB` gzipped
 >- 🎯 declarative;
 >>- dom reactivity follows this pattern:[`attributeName`="`attributeOrPropertySelector1`;`attributeOrPropertySelector2`;...;`attributeOrPropertySelectorN`"], to reflect and bind the input to the signal value `realtime`;
->- `v0.12.x`<strike> 🗜 `prebundled-first` approach;
->>- core are already prebuild in this `npm or github` `./vorthInitiator.mjs`;</strike>
+>- `v0.12.x`<strike></strike> 🗜 `prebundled-first` approach;
+>>- core are already prebuild in this `npm or github` `./vorthInitiator.mjs`;
 >>- we drop this feature, in order to achieve full typehint support;
 >- 📃 comprehensive typehint;
 >>- <b>`vorth`</b> functionality are fully `typehinted`,
@@ -52,10 +52,11 @@ refer to [virst](https://www.npmjs.com/package/virst):
  npx vorth-example
  ```
  - you'll then have this folder structure like this:
- >- `.vscode`
- >- `vorth.config.mjs`
- >- `vorth-src`
- >>- `vorthInitiator.mjs`
+ >- `.vscode`: snippets collection.
+ >- `jsconfig.json`: typehint helper for `.mts` and `.ts` files.
+ >- `vorth.config.mjs`: builder config
+ >- `vorth-src`: source folder.
+ >>- `vorthInitiator.mjs`: <b>`vorth`</b> entry point.
  >>- `data`
  >>- `libs`
  >>- `lifecycles`
@@ -66,7 +67,7 @@ refer to [virst](https://www.npmjs.com/package/virst):
  ```shell
  npx vorth
  ```
- >- <b>`vorth`</b> detects `.mjs`, `.ts`, and `.mts` extentions inside `sourcePath` directory, and bundles them to `targetPath` `1 to 1` (it have to be in `esm`);
+ >- <b>`vorth`</b> detects `.mjs`, `.ts`, and `.mts` extentions inside `sourcePath` directory, and bundles them to `targetPath` `1 to 1` (it have to be in `esm style`);
  >- all static imports will be bundled;
  >- due to <b>`vorth`</b> extensively generate types on the fly while also uses custom string generation and only generate `jsdoc`(no `.d.ts`), <b>`vorth`</b> need to put `jsconfig.json` on your project, so if you have any settings for this `compilerOptions` settings will be overwritten
 ```json
@@ -91,8 +92,8 @@ refer to [virst](https://www.npmjs.com/package/virst):
 versions
 >- `v0.11.x`:
 >>- fixed `onViewPort` bugs;
->>- <strike>beta for full release;
->>- need to be checked for edge cases;</strike>
+>>- <strike>beta for full release;</strike>
+>>- <strike>need to be checked for edge cases;</strike>
 >- `v0.12.x`:
 >>- drop direct writing on endpoint support, to achieve full typehint on all files;
 >>- streamlined `install method` and `builder script`;
@@ -103,7 +104,7 @@ versions
 - [__vorthConfig](#__vorthconfig)
 <h2 id="vorth">Vorth</h2>
 
-#### how to structure your static file:- load `targetPath/vorthInitiator.mjs` to your `html`;```html<script type="module" src="targetPath/vorthInitiator.mjs"></script>```- add neccessary attribute to `vorthInitiator.mjs` like `defer`(if you put it in the head tag);- structure your folder:>- `{targetPath}`>>- `vorthInitiator.mjs`>>- `data`>>- `libs`>>- `lifecycles`>>- `workers`- use snippet prefixed by <b>`>>`</b>(double `greater than` symbol) for quick typehinting snippets;>- the snippets structure are templated in a way to generate the types, do not put the types outside the snippets recomended;- add `property controls` (`content` `attribute`) for vorth in the head tag if neccessary;```html<meta property="vorth-batch" content="10" />```>- [`property="vorth-batch"`]: `content` used to tell <b>`vorth`</b> maximum element to be loaded at batch when crossing the `viewPort`;>- you can add `;pre` like this [`vorth="lifecycle/name;pre"`] to directly process the `element` without waiting for it to cross the `viewPort`;>- `"lifecycle/name"` means you are pointing to `"targetPath/lifecycles/lifecycle/name.mjs"`, this patterns also applied to `importData`, `lifecycleAttr`, `importWorker`, `importLib`, to their respective folder;```html<meta property="vorth-versionMin" content="1738851920151" />```>- [`property="vorth-versionMin"`]: `content` used to tell <b>`vorth`</b> minimum `cachedDate` in `unix date ms` is allowed;>- you can dynamically provide this tag from the server, and that will refresh the `cachedDate` of <b>`vorth`</b> code (`managed internally`), while keeping client's session and local storage;- both `property controls` are monitored, so when it's changed dynamically in the runtime, <b>`vorth`</b> will reactively apply the new value to it's logic;#### how to add the lifecycle handler to html:```html<div vorth="path/fileName"></div>```- this will target `{targetPath}/lifecycles/path/fileName.mjs`;#### further documentation and examples- will be posted in [html-first documentation website](https://html-first.bss.design/)
+#### how to structure your static file:- load `{targetPath}/vorthInitiator.mjs` to your `html`;```html<script type="module" src="{targetPath}/vorthInitiator.mjs"></script>```- add neccessary `attribute` to `vorthInitiator.mjs` like `defer` or `async`(if you put it in the head tag);- structure your folder:>- `{targetPath}`>>- `vorthInitiator.mjs`>>- `data`>>- `libs`>>- `lifecycles`>>- `workers`- use this snippets for quick typehinting(prefixed by `>>` symbol):>>- `>>data`;>>- `>>lib`;>>- `>>lifecycle`;>>- `>>workerThread`;>- the snippets structures are templated in a way to generate the types, do not put the types outside the snippets recomended place;- add `property controls` (`content` `attribute`) for vorth in the head tag if neccessary;```html<meta property="vorth-batch" content="10" />```>- [`property="vorth-batch"`]: `content` used to tell <b>`vorth`</b> maximum element to be loaded at batch when crossing the `viewPort`;>- you can add `;pre` like this [`vorth="lifecycle/name;pre"`] to directly process the `element` without waiting for it to cross the `viewPort`;>- `"lifecycle/name"` means you are pointing to `"{targetPath}/lifecycles/lifecycle/name.mjs"`, this patterns also applied to `importData`, `lifecycleAttr`, `importWorker`, `importLib`, to their respective folder;```html<meta property="vorth-versionMin" content="1738851920151" />```>- [`property="vorth-versionMin"`]: `content` used to tell <b>`vorth`</b> minimum `cachedDate` in `unix date ms` is allowed;>- you can dynamically provide this tag from the server, and that will refresh the `cachedDate` of <b>`vorth`</b> code (`managed internally`), while keeping client's session and local storage;- both `property controls` are monitored, so when it's changed dynamically in the runtime, <b>`vorth`</b> will reactively apply the new value to it's logic;#### how to add the lifecycle handler to html:```html<div vorth="path/fileName"></div>```- this will target `{targetPath}/lifecycles/path/fileName.mjs`;#### further documentation and examples- will be posted in [html-first documentation website](https://html-first.bss.design/)
 
 *) <sub>[go to exported list](#importable-classes)</sub>
 

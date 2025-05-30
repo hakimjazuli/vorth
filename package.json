@@ -12,7 +12,7 @@
 		"@html_first/js_lib_template": "link:@html_first/js_lib_template",
 		"concurrently": "^9.1.2",
 		"@types/bun": "latest",
-		"typescript": "5.4",
+		"typescript": "^5.8.3",
 		"vorth": "link:vorth"
 	},
 	"dependencies": {
