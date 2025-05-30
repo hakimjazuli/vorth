@@ -1,13 +1,13 @@
 {
 	"compilerOptions": {
+		"baseUrl": ".",
 		"allowJs": true,
-		"module": "ESNext",
-		"target": "ESNext",
+		"module": "esnext",
+		"target": "esnext",
 		"moduleResolution": "node",
 		"esModuleInterop": true,
 		"skipLibCheck": true,
 		"skipDefaultLibCheck": true,
 		"allowSyntheticDefaultImports": true
-	},
-	"include": ["./index.mjs"]
+	}
 }

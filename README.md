@@ -15,7 +15,7 @@
 >- 📊 data layer;
 >>- <b>`vorth`</b> provide `synchronized data layer` out of the box via `virst` `signal` and `domReflector`;
 >- 💪 strong integration support with `npm` `client-side` 📚 packages;
->>- <b>`vorth`</b> have prepared `npx vorth` that functions as a directory watcher for developement (in `mjs`, `ts`, or `mts` ) to `bundle` and `minify` `1 to 1` `.mjs` `endpoints`, for which you can `bundle` and `minify` additional client side `npm packages` as `libs`;
+>>- <b>`vorth`</b> have prepared `npx vorth` that functions as a directory watcher for developement (in `.mjs`, `.ts`, or `.mts` ) to `bundle` and `minify` `1 to 1` `.mjs` `endpoints`, for which you can `bundle` and `minify` additional client side `npm packages` as `libs`;
 >>>- <b>YES</b>, you can put `typescript` and `javascipt` on the same source folder;
 >- ⌛ on demand dom update via [virst](https://www.npmjs.com/package/virst) `Lifecycle`;
 >>- with the possibility of offloading the templating responsibility to server, your premade static html stack, or even on demand update by `HATEOAS` apporach, <b>`vorth`</b> can handle the client side `logic`at ⚡`O(1)`⚡ starts, without compromising the ability of html templating when it's neccessary;
@@ -68,6 +68,24 @@ refer to [virst](https://www.npmjs.com/package/virst):
  ```
  >- <b>`vorth`</b> detects `.mjs`, `.ts`, and `.mts` extentions inside `sourcePath` directory, and bundles them to `targetPath` `1 to 1` (it have to be in `esm`);
  >- all static imports will be bundled;
+ >- due to <b>`vorth`</b> extensively generate types on the fly while also uses custom string generation and only generate `jsdoc`(no `.d.ts`), <b>`vorth`</b> need to put `jsconfig.json` on your project, so if you have any settings for this `compilerOptions` settings will be overwritten
+```json
+{
+...
+	"compilerOptions": {
+		...
+		"baseUrl": ".",
+		"allowJs": true,
+		"module": "esnext",
+		"target": "esnext",
+		"moduleResolution": "node",
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"skipDefaultLibCheck": true,
+		"allowSyntheticDefaultImports": true
+	}
+}
+```
  - check at [Vorth](#vorth) for `property control`;
 
 versions
