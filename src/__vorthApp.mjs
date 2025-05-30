@@ -16,6 +16,7 @@ import {
 } from 'fs';
 import { join, basename, extname } from 'path';
 import { _Queue, _QueueFIFO, _QueueObject, _QueueObjectFIFO } from '@html_first/simple_queue';
+import { shared } from './shared.export.mjs';
 
 export class __vorthApp {
 	/**
@@ -58,6 +59,12 @@ export class __vorthApp {
 			})
 			.on('unlinkDir', (path_, stats) => {
 				__vorthApp.handler(path_, stats, 'dir');
+			})
+			.once('add', (_, stats) => {
+				const paths = shared.paths;
+				for (const path_ in paths) {
+					__vorthApp.handler(paths[path_], stats);
+				}
 			});
 	}
 	/**

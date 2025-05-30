@@ -1,6 +1,6 @@
 // @ts-check
 
-import { $, Derived, Let, Lifecycle, Ping, Q, WorkerMainThread, helper, onViewPort } from 'virst';
+import { $, Derived, Let, Lifecycle, Ping, Q, helper, onViewPort } from 'virst';
 import { lifecycleAttr } from 'vorth/src/lifecycles/lifecyclesList.mjs';
 import { importLib } from './libs/importLib.mjs';
 import { importData } from './data/importData.mjs';

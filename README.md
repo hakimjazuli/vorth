@@ -42,7 +42,14 @@ refer to [virst](https://www.npmjs.com/package/virst):
  - install by running this script:
  ```shell
  npm i vorth
+ ```
+ - for empty starter:
+ ```shell
  npx vorth-starter
+ ```
+ - for starter with examples:
+ ```shell
+ npx vorth-example
  ```
  - you'll then have this folder structure like this:
  >- `.vscode`

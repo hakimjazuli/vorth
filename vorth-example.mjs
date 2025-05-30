@@ -2,7 +2,6 @@
 // @ts-check
 
 import { xixth } from 'xixth';
-import { shared } from './src/shared.export.mjs';
 
 new xixth({
 	packageName: 'vorth',
@@ -26,21 +25,13 @@ new xixth({
 			},
 		},
 		'starter-project': {
-			src: 'vorth-src/vorthInitiator.mjs',
-			dest: 'vorth-src/vorthInitiator.mjs',
+			src: 'vorth-src',
+			dest: 'vorth-src',
 			on: {
 				async failed({ src, dest }) {
 					console.error({ error: `failed to copy "${src}" to "${dest}"` });
 				},
 			},
-		},
-	},
-	flagCallbacks: {
-		async afterCopy() {
-			const paths = shared.paths;
-			for (const path_ in paths) {
-				this.makeDir(this.generateProjectAbsolutePath(paths[path_]));
-			}
 		},
 	},
 });
