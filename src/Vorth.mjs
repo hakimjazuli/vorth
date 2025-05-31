@@ -128,7 +128,7 @@ export class Vorth {
 						try {
 							const data = thisProperties_[property];
 							data.value = JSON.parse(value);
-							if (data.onCompare) {
+							if ('onCompare' in data) {
 								data.onCompare(value);
 							}
 						} catch (error) {
@@ -192,22 +192,24 @@ export class Vorth {
 	 * @type {Map<string, Derived|Let>}
 	 */
 	static cachedLet = new Map();
+	static noLifecycle = 'no_lifecycle';
 	/**
 	 * @param {string} importPath
 	 * @returns {Promise<import('./lifecycles/vorthLifecycle.mjs').vorthLifecycle|false>}
 	 */
 	static importLifecycle = async (importPath) => {
 		const endpoint = `${Vorth.pathLifecycles}${importPath}.mjs`;
+		const noLifecycle = Vorth.noLifecycle;
 		try {
 			const importedLifecycle = await import(
 				`${endpoint}?${Vorth.cacheDateName}=${Vorth.cacheDate}`
 			);
 			if (!('lifecycle' in importedLifecycle)) {
-				throw Error('no_lifecycle');
+				throw Error(noLifecycle);
 			}
 			return importedLifecycle.lifecycle;
 		} catch (error) {
-			if (error.message === 'no_lifecycle') {
+			if (error.message === noLifecycle) {
 				console.error({
 					endpoint,
 					message:
@@ -562,10 +564,10 @@ export class Vorth {
 					element,
 					true
 				).attr,
-			// @ts-ignore
+			// @ts-expect-error
 			importLib: async (relativePath) => {
 				const lib = await importLib(relativePath);
-				// @ts-ignore
+				// @ts-expect-error
 				return async (...params) => await lib(vorth, ...params);
 			},
 			$: (effect) => Vorth.$(effect, effects),
@@ -576,7 +578,6 @@ export class Vorth {
 				},
 			},
 			let_: (obj) => Vorth.let(obj, element, signals, effects),
-			// @ts-ignore
 			derived: (obj) => Vorth.derived(obj, element, signals, effects),
 			onViewPort,
 		};
@@ -602,18 +603,18 @@ export class Vorth {
 	 * @type {Vorth}
 	 */
 	static _;
-	static paths = shared.paths;
 	constructor() {
 		if (Vorth._ instanceof Vorth) {
 			helper.warningSingleton(Vorth);
 			return;
 		}
 		Vorth._ = this;
+		const paths = shared.paths;
 		Vorth.base = new URL('./', import.meta.url).href;
-		Vorth.pathData = `${Vorth.base}data/`;
-		Vorth.pathLibs = `${Vorth.base}libs/`;
-		Vorth.pathLifecycles = `${Vorth.base}lifecycles/`;
-		Vorth.pathWorkers = `${Vorth.base}workers/`;
+		Vorth.pathData = `${Vorth.base}${paths.data}/`;
+		Vorth.pathLibs = `${Vorth.base}${paths.libs}/`;
+		Vorth.pathLifecycles = `${Vorth.base}${paths.lifecycles}/`;
+		Vorth.pathWorkers = `${Vorth.base}${paths.workers}/`;
 		Vorth.assignProperties();
 		/**
 		 * @private

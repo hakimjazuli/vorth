@@ -173,11 +173,12 @@ export class __vorthApp {
 		let typeof_ = '';
 		const typeof__ = relative[0];
 		relative.shift();
+		const paths = shared.paths;
 		switch (typeof__) {
-			case 'workers':
-			case 'libs':
-			case 'data':
-			case 'lifecycles':
+			case paths.data:
+			case paths.libs:
+			case paths.lifecycles:
+			case paths.workers:
 				typeof_ = typeof__;
 				break;
 		}
@@ -217,7 +218,7 @@ export class __vorthApp {
 /**
  * @template {${fileBaseName}} T`;
 					switch (typeof__) {
-						case 'data':
+						case paths.data:
 							{
 								const extender = ['void'];
 								for (let i = 0; i < fileNames.length; i++) {
@@ -243,7 +244,7 @@ export class __vorthApp {
  */`;
 							}
 							break;
-						case 'libs':
+						case paths.libs:
 							{
 								const extender = ['void'];
 								for (let i = 0; i < fileNames.length; i++) {
@@ -266,7 +267,7 @@ export class __vorthApp {
  */`;
 							}
 							break;
-						case 'lifecycles':
+						case paths.lifecycles:
 							modifiedContent = `${modifiedContent}
  * @template {boolean} B
  * @param {T} lifecycleName
@@ -280,7 +281,7 @@ export const lifecycleAttr = (lifecycleName, bypasWaitOnViewToRender = false) =>
 	return \`vorth='\${lifecycleName}\${pre}'\`;
 };`;
 							break;
-						case 'workers':
+						case paths.workers:
 							{
 								let lists = ['void'];
 								for (let i = 0; i < listName.length; i++) {

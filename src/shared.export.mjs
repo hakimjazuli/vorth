@@ -3,7 +3,7 @@
 export class shared {
 	static paths = {
 		data: 'data',
-		libs: 'lib',
+		libs: 'libs',
 		lifecycles: 'lifecycles',
 		workers: 'workers',
 	};
