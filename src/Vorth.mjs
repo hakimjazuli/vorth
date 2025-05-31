@@ -18,13 +18,13 @@ import { shared } from './shared.export.mjs';
  */
 /**
  * @description
- * #### how to structure your static file:
+ * #### how to:
  * - load `{targetPath}/vorthInitiator.mjs` to your `html`;
  * ```html
  * <script type="module" src="{targetPath}/vorthInitiator.mjs"></script>
  * ```
  * - add neccessary `attribute` to `vorthInitiator.mjs` like `defer` or `async`(if you put it in the head tag);
- * - structure your folder:
+ * - structure of your static end point path should be like this:
  * >- `{targetPath}`
  * >>- `vorthInitiator.mjs`
  * >>- `data`

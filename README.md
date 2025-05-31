@@ -1,4 +1,4 @@
-<h1>vorth</h1>
+<h1>vorth<super>JS</super></h1>
 
 <b>`vorth`</b> is a `client-side` javascipt  library for handling `element lifecycle` and `data to dom reactivity`, which have:
 >- 🐤 lightweight core;
@@ -43,11 +43,11 @@ refer to [virst](https://www.npmjs.com/package/virst):
  ```shell
  npm i vorth
  ```
- - for empty starter:
+ - then for empty starter:
  ```shell
  npx vorth-starter
  ```
- - for starter with examples:
+ - or for starter with examples:
  ```shell
  npx vorth-example
  ```
@@ -104,7 +104,7 @@ versions
 - [__vorthConfig](#__vorthconfig)
 <h2 id="vorth">Vorth</h2>
 
-#### how to structure your static file:- load `{targetPath}/vorthInitiator.mjs` to your `html`;```html<script type="module" src="{targetPath}/vorthInitiator.mjs"></script>```- add neccessary `attribute` to `vorthInitiator.mjs` like `defer` or `async`(if you put it in the head tag);- structure your folder:>- `{targetPath}`>>- `vorthInitiator.mjs`>>- `data`>>- `libs`>>- `lifecycles`>>- `workers`- use this snippets for quick typehinting(prefixed by `>>` symbol):>>- `>>data`;>>- `>>lib`;>>- `>>lifecycle`;>>- `>>workerThread`;>- the snippets structures are templated in a way to generate the types, do not put the types outside the snippets recomended place;- add `property controls` (`content` `attribute`) for vorth in the head tag if neccessary;```html<meta property="vorth-batch" content="10" />```>- [`property="vorth-batch"`]: `content` used to tell <b>`vorth`</b> maximum element to be loaded at batch when crossing the `viewPort`;>- you can add `;pre` like this [`vorth="lifecycle/name;pre"`] to directly process the `element` without waiting for it to cross the `viewPort`;>- `"lifecycle/name"` means you are pointing to `"{targetPath}/lifecycles/lifecycle/name.mjs"`, this patterns also applied to `importData`, `lifecycleAttr`, `importWorker`, `importLib`, to their respective folder;```html<meta property="vorth-versionMin" content="1738851920151" />```>- [`property="vorth-versionMin"`]: `content` used to tell <b>`vorth`</b> minimum `cachedDate` in `unix date ms` is allowed;>- you can dynamically provide this tag from the server, and that will refresh the `cachedDate` of <b>`vorth`</b> code (`managed internally`), while keeping client's session and local storage;- both `property controls` are monitored, so when it's changed dynamically in the runtime, <b>`vorth`</b> will reactively apply the new value to it's logic;#### how to add the lifecycle handler to html:```html<div vorth="path/fileName"></div>```- this will target `{targetPath}/lifecycles/path/fileName.mjs`;#### further documentation and examples- will be posted in [html-first documentation website](https://html-first.bss.design/)
+#### how to:- load `{targetPath}/vorthInitiator.mjs` to your `html`;```html<script type="module" src="{targetPath}/vorthInitiator.mjs"></script>```- add neccessary `attribute` to `vorthInitiator.mjs` like `defer` or `async`(if you put it in the head tag);- structure of your static end point path should be like this:>- `{targetPath}`>>- `vorthInitiator.mjs`>>- `data`>>- `libs`>>- `lifecycles`>>- `workers`- use this snippets for quick typehinting(prefixed by `>>` symbol):>>- `>>data`;>>- `>>lib`;>>- `>>lifecycle`;>>- `>>workerThread`;>- the snippets structures are templated in a way to generate the types, do not put the types outside the snippets recomended place;- add `property controls` (`content` `attribute`) for vorth in the head tag if neccessary;```html<meta property="vorth-batch" content="10" />```>- [`property="vorth-batch"`]: `content` used to tell <b>`vorth`</b> maximum element to be loaded at batch when crossing the `viewPort`;>- you can add `;pre` like this [`vorth="lifecycle/name;pre"`] to directly process the `element` without waiting for it to cross the `viewPort`;>- `"lifecycle/name"` means you are pointing to `"{targetPath}/lifecycles/lifecycle/name.mjs"`, this patterns also applied to `importData`, `lifecycleAttr`, `importWorker`, `importLib`, to their respective folder;```html<meta property="vorth-versionMin" content="1738851920151" />```>- [`property="vorth-versionMin"`]: `content` used to tell <b>`vorth`</b> minimum `cachedDate` in `unix date ms` is allowed;>- you can dynamically provide this tag from the server, and that will refresh the `cachedDate` of <b>`vorth`</b> code (`managed internally`), while keeping client's session and local storage;- both `property controls` are monitored, so when it's changed dynamically in the runtime, <b>`vorth`</b> will reactively apply the new value to it's logic;#### how to add the lifecycle handler to html:```html<div vorth="path/fileName"></div>```- this will target `{targetPath}/lifecycles/path/fileName.mjs`;#### further documentation and examples- will be posted in [html-first documentation website](https://html-first.bss.design/)
 
 *) <sub>[go to exported list](#importable-classes)</sub>
 

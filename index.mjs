@@ -5,7 +5,7 @@
  * @copyright
  * this library is build and bundled under MIT license
  * @description
- * <h1>vorth</h1>
+ * <h1>vorth<super>JS</super></h1>
  * 
  * <b>`vorth`</b> is a `client-side` javascipt  library for handling `element lifecycle` and `data to dom reactivity`, which have:
  * >- 🐤 lightweight core;
@@ -50,11 +50,11 @@
  *  ```shell
  *  npm i vorth
  *  ```
- *  - for empty starter:
+ *  - then for empty starter:
  *  ```shell
  *  npx vorth-starter
  *  ```
- *  - for starter with examples:
+ *  - or for starter with examples:
  *  ```shell
  *  npx vorth-example
  *  ```
