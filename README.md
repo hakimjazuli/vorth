@@ -99,6 +99,11 @@ versions
 >>- streamlined `install method` and `builder script`;
 >>- beta for full release;
 >>- need to be checked for edge cases;
+>- `v0.12.9+`:
+>>- updated <b>`virst`</b> version for security;
+>>- example with `html` file;
+>>- `for_.of` also returns parentData;
+
 ## importable-classes
 - [Vorth](#vorth)
 - [__vorthConfig](#__vorthconfig)

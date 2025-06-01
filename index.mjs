@@ -106,6 +106,11 @@
  * >>- streamlined `install method` and `builder script`;
  * >>- beta for full release;
  * >>- need to be checked for edge cases;
+ * >- `v0.12.9+`:
+ * >>- updated <b>`virst`</b> version for security;
+ * >>- example with `html` file;
+ * >>- `for_.of` also returns parentData;
+ * 
  */
 export { shared } from './src//shared.export.mjs';
 export { Vorth } from './src//Vorth.mjs';
