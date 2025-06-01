@@ -28,6 +28,15 @@ new xixth({
 				},
 			},
 		},
+		'vorth-public': {
+			src: 'public',
+			dest: 'public',
+			on: {
+				async failed({ src, dest }) {
+					console.error({ error: `failed to copy "${src}" to "${dest}"` });
+				},
+			},
+		},
 		'starter-project': {
 			src: 'vorth-src/vorthInitiator.mjs',
 			dest: 'vorth-src/vorthInitiator.mjs',

@@ -6,7 +6,6 @@ export const lifecycle = async ({ for_, html, attr, importData }) => {
 	if (!child) {
 		return;
 	}
-	const looped_ = importData('loop');
 	html`
 		<button
 			${attr({
@@ -18,7 +17,7 @@ export const lifecycle = async ({ for_, html, attr, importData }) => {
 				on: {
 					click: {
 						async listener() {
-							const looped = await looped_;
+							const looped = await child.parentData;
 							const newOne = looped.value.length;
 							looped.value.push({ a: `${newOne + 1}`, b: `b${newOne + 1}` });
 							looped.call$();
@@ -32,7 +31,7 @@ export const lifecycle = async ({ for_, html, attr, importData }) => {
 				on: {
 					click: {
 						async listener() {
-							const looped = await looped_;
+							const looped = await child.parentData;
 							looped.value.splice(child.index, 1);
 							looped.call$();
 						},

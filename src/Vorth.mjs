@@ -10,6 +10,7 @@ import { on } from './lifecycles/on.mjs';
 import { shared } from './shared.export.mjs';
 
 /**
+ * @typedef {import('vorth/src/data/dataList.mjs').dataList} dataList
  * @typedef {import('./sharedTypes.type.mjs').onViewPortCallback} onViewPortCallback
  * @typedef {import('./sharedTypes.type.mjs').anyButUndefined} anyButUndefined
  * @typedef {import('./sharedTypes.type.mjs').VorthNamespace} VorthNamespace
@@ -238,7 +239,7 @@ export class Vorth {
 	static storageKey = (relativePath) => `vorth-data-${relativePath}`;
 	/**
 	 * @param {Object} a0
-	 * @param {import('vorth/src/data/dataList.mjs').dataList} a0.dataName
+	 * @param {dataList} a0.dataName
 	 * - Let<Array<{[key:string]:string}>>;
 	 * @param {import('vorth/src/lifecycles/lifecyclesList.mjs').lifecyclesList} a0.childLifescycle
 	 * - lifecycle for the `for_.as`;
@@ -271,7 +272,7 @@ export class Vorth {
 		element.innerHTML = '';
 		child.setAttribute(
 			Vorth.namespace,
-			waitForOnViewToRender ? `${childLifescycle};${Vorth.pre}` : childLifescycle
+			waitForOnViewToRender ? childLifescycle : `${childLifescycle};${Vorth.pre}`
 		);
 		const signal = await importData(dataName, _);
 		new $(async () => {
@@ -308,24 +309,31 @@ export class Vorth {
 	};
 	/**
 	 * @private
-	 * @type {Map<HTMLElement, {name:import('vorth/src/data/dataList.mjs').dataList, index: number,signal:Let<Record<string, string>>}>}
+	 * @type {Map<HTMLElement, {name:dataList, index: number,signal:Let<Record<string, string>>}>}
 	 */
 	static looped = new Map();
 	/**
+	 * @template {dataList} L
+	 * @typedef {import('vorth/src/data/dataList.mjs').importData<L>} importData_
+	 */
+	/**
 	 * to handle looped data from `for_`
-	 * @template {import('vorth/src/data/dataList.mjs').dataList} dataList
-	 * @param {dataList} [dataName]
-	 * - this pramater is purely for IDE typechecking, and won't affect the script in any ways;
+	 * @template {dataList} dataList
+	 * @template {number} indexN
+	 * @param {dataList} dataName
 	 * @param {HTMLElement} [__]
 	 * - auto filled by Vorth, keep it unfilled!!!;
 	 * @param {Array<Let|false>} [___]
 	 * - auto filled by Vorth, keep it unfilled!!!;
-	 * @returns {{index:number, value:Awaited<ReturnType<import('vorth/src/data/dataList.mjs').importData<dataList>>>["value"][0]}|false}
+	 * @returns {{parentData:ReturnType<importData_<dataList>>, index:indexN, value:Awaited<ReturnType<importData_<dataList>>>["value"][indexN]}|false}
 	 */
 	static of = (dataName, __, ___) => {
 		const data_ = Vorth.looped.get(__);
 		___.push(data_.signal);
 		return {
+			get parentData() {
+				return importData(dataName);
+			},
 			get value() {
 				return data_.signal.value;
 			},
@@ -333,6 +341,7 @@ export class Vorth {
 				data_.signal.value = newValue;
 				data_.signal.call$();
 			},
+			// @ts-expect-error
 			get index() {
 				return data_.index;
 			},
