@@ -3,7 +3,7 @@
  */
 // @ts-check
 /**
- * @typedef {'app'|'count'|'loop/child'|'loop/parent'|'multiref'|'test'} lifecyclesList
+ * @typedef {'app'|'count'|'count_'|'loop/child'|'loop/parent'|'multiref'|'test'} lifecyclesList
  */
 /**
  * @template {lifecyclesList} T

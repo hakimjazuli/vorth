@@ -3,4 +3,4 @@
 /**
  * @type {import('vorth').vorthData<false, number>}
  */
-export const data = [0, 'sessionStorage'];
+export const data = [0, 0.1, 'sessionStorage'];

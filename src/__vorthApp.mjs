@@ -498,7 +498,7 @@ export const lifecycleAttr = (lifecycleName, bypasWaitOnViewToRender = false) =>
 					js: `/** @module */`, // Ensures module-level JSDoc is included
 				},
 			});
-			console.log({ message: 'succesfully bundled', from, to });
+			console.log({ message: 'succesfully bundled', from, to, timestamp: Date.now() });
 		} catch (error) {
 			console.error({
 				...error,

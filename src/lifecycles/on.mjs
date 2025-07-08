@@ -8,14 +8,14 @@ export class on {
 	 * @param {import('./vorthLifecycle.mjs').vorthLifecycleOptions["onDisconnected"]} onDisconnected
 	 */
 	constructor(element, onDisconnected) {
-		this.element = element;
+		this.#element = element;
 		new Ping(true, async () => {
 			onDisconnected(async () => {
-				this.eventRemover.forEach((remover) => {
+				this.#eventRemover.forEach((remover) => {
 					remover();
-					this.eventRemover.delete(remover);
+					this.#eventRemover.delete(remover);
 				});
-				const effects = this.effects;
+				const effects = this.#effects;
 				for (let i = 0; i < effects.length; i++) {
 					const effect = effects[i];
 					effect.remove$();
@@ -24,32 +24,29 @@ export class on {
 		});
 	}
 	/**
-	 * @private
 	 * @type {HTMLElement}
 	 */
-	element;
+	#element;
 	/**
-	 * @private
 	 * @type {$[]}
 	 */
-	effects = [];
+	#effects = [];
 	/**
-	 * @private
 	 * @type {Set<()=>void>}
 	 */
-	eventRemover = new Set();
+	#eventRemover = new Set();
 	/**
 	 * @param {{[K in keyof HTMLElementEventMap]?: {listener:((this: HTMLElement, ev: HTMLElementEventMap[K])=> void), options?:{onAdd?:boolean|AddEventListenerOptions, onRemove?:boolean|EventListenerOptions}}}} on
 	 * @returns {void}
 	 */
 	on = (on) => {
 		new Ping(true, async () => {
-			const element = this.element;
+			const element = this.#element;
 			for (const type in on) {
 				const { listener, options = {} } = on[type];
 				const { onAdd = false, onRemove = false } = options;
 				element.addEventListener(type, listener, onAdd);
-				this.eventRemover.add(() => {
+				this.#eventRemover.add(() => {
 					element.removeEventListener(type, listener, onRemove);
 				});
 			}

@@ -8,11 +8,12 @@
  * @type {(this: WindowEventHandlers, event: workerType['receive']['worker']) =>Promise<any>}
  */
 onmessage = async function (event) {
+	console.log({ event });
 	/**
 	 * @type {workerType['post']['worker']}
 	 */
 	const rest = {
-		theTestWorkerSays: `hi..... ${event.data}`,
+		theTestWorkerSays: `hi..... ${event.data.mainThreadSays}`,
 	};
 	postMessage(rest);
 };

@@ -8,5 +8,6 @@ export const data = [
 		{ a: 'first', b: 'bFirst' },
 		{ a: 'second', b: 'bSecond' },
 	],
+	0.1,
 	'sessionStorage',
 ];

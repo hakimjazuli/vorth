@@ -1,20 +1,21 @@
 // @ts-check
 
 /** @type {import('vorth').vorthLifecycle} */
-export const lifecycle = async ({
-	html,
-	lifecycleAttr,
-	importData,
-	let_,
-	$,
-	importLib,
-	importWorker,
-	attr,
-	onAttributeChanged,
-	on,
-	derived,
-	select,
-}) => {
+export const lifecycle = async function () {
+	const {
+		html,
+		lifecycleAttr,
+		importData,
+		let_,
+		$,
+		importLib,
+		importWorker,
+		attr,
+		onAttributeChanged,
+		on,
+		derived,
+		select,
+	} = this;
 	on({
 		mouseenter: {
 			listener() {
@@ -61,12 +62,14 @@ export const lifecycle = async ({
 			},
 		},
 	});
-	const [log_, let__, derived_, { resultSignal: testSignal, postMessage }] = await Promise.all([
-		importLib('log'),
-		importData('let_'),
-		importData('derived'),
-		importWorker('test'),
-	]);
+	const [log_, let__, derived_, { resultSignal: testSignal, postMessage }, datas] =
+		await this.promises([
+			importLib('log'),
+			importData('let_'),
+			importData('derived'),
+			importWorker('test'),
+			this.importDatas({ count: '' }),
+		]);
 	html`
 		<div haha-check derived-class="class" class="other class why not">haha-check</div>
 		<div haha-check ${gjh.attr}="innerHTML" style="word-wrap: break-word;">
@@ -107,7 +110,7 @@ export const lifecycle = async ({
 						},
 					},
 				})}="class"
-				>derived and hehe color check</span
+				>"derived" and "hehe" color check</span
 			>
 		</div>
 	`.inner();
@@ -135,8 +138,13 @@ export const lifecycle = async ({
 		log_({ a: (let__.value = duniaKe.value.toString()), b: 99 });
 	});
 	$(async () => {
+		console.log({ oaerkuhakruhea: datas.count.value });
+	});
+
+	$(async () => {
 		const value = derived_.value;
-		postMessage(value);
+		console.log({ derivedValue: derived_.value });
+		postMessage({ mainThreadSays: value });
 	});
 	$(async () => {
 		const value = testSignal.value;

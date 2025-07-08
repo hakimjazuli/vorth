@@ -1,6 +1,7 @@
 // @ts-check
 import { $ as $_, Lifecycle } from 'virst';
 import { Vorth } from '../Vorth.mjs';
+import { Q } from 'virst';
 
 /**
  * @param {(isAtInitialization:boolean)=>Promise<void>} effect
@@ -112,12 +113,15 @@ export const select = (
 					});
 				}
 			};
+			const { resume } = await Q.unique(`select:${attributeName}`);
 			if (!waitForOnViewToRender) {
 				await lifecycleCallback();
+				resume();
 				return;
 			}
 			onViewPort(async () => {
 				await lifecycleCallback();
+				resume();
 			});
 		},
 	});

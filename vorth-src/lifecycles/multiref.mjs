@@ -1,15 +1,16 @@
 // @ts-check
 
 /** @type {import('vorth').vorthLifecycle} */
-export const lifecycle = async ({ html, importData, attr }) => {
-	const let__ = importData('let_');
+export const lifecycle = async function () {
+	const { html, importData, attr } = this;
+	const let__ = await importData('let_');
 	html`
 		<div
 			style="word-wrap: break-word;"
 			${attr({
 				async lifecycle({ $ }) {
 					$(async () => {
-						const value = (await let__).value;
+						const value = let__.value;
 						console.log({ multiref: value });
 						this.innerText = value;
 					});

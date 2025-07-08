@@ -1,11 +1,13 @@
 // @ts-check
 
 /** @type {import('vorth').vorthLifecycle} */
-export const lifecycle = async ({ for_, html, attr, importData }) => {
+export const lifecycle = async function () {
+	const { for_, html, attr } = this;
 	const child = for_.of('loop');
 	if (!child) {
 		return;
 	}
+	const parentData = await child.parentData;
 	html`
 		<button
 			${attr({
@@ -17,7 +19,7 @@ export const lifecycle = async ({ for_, html, attr, importData }) => {
 				on: {
 					click: {
 						async listener() {
-							const looped = await child.parentData;
+							const looped =  parentData;
 							const newOne = looped.value.length;
 							looped.value.push({ a: `${newOne + 1}`, b: `b${newOne + 1}` });
 							looped.call$();
@@ -31,7 +33,7 @@ export const lifecycle = async ({ for_, html, attr, importData }) => {
 				on: {
 					click: {
 						async listener() {
-							const looped = await child.parentData;
+							const looped =  parentData;
 							looped.value.splice(child.index, 1);
 							looped.call$();
 						},

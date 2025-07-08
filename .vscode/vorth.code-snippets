@@ -48,28 +48,57 @@
 		],
 		"description": "tsworkerThread"
 	},
-	"VorthData": {
+	"VorthDataSignal": {
 		"scope": "javascript",
-		"prefix": ">>data",
+		"prefix": ">>dataSignal",
 		"body": [
 			"// @ts-check",
 			"",
 			"/**",
-			"* @type {import('vorth').vorthData<${1:isDerived?}, ${2:signalValueType}>}",
+			"* @type {import('vorth').vorthData<false, ${1:signalValueType}>}",
 			"*/",
-			"export const data = ${0:}"
+			"export const data = [${2:data}, ${3:floatNumberVersion}, '${4:}']"
 		],
-		"description": "VorthData"
+		"description": "VorthDataSignal"
 	},
-	"tsVorthData": {
+	"tsVorthDataSignal": {
 		"scope": "typescript",
-		"prefix": ">>data",
+		"prefix": ">>dataSignal",
 		"body": [
 			"import type { vorthData } from 'vorth';",
 			"",
-			"export const data: vorthData<${1:isDerived?}, ${2:signalValueType}> = ${0:}"
+			"export const data: vorthData<false, ${1:signalValueType}> = [${2:data}, ${3:floatNumberVersion}, '${4:}']"
 		],
-		"description": "tsVorthData"
+		"description": "tsVorthDataSignal"
+	},
+	"VorthDataDerived": {
+		"scope": "javascript",
+		"prefix": ">>dataDerived",
+		"body": [
+			"// @ts-check",
+			"",
+			"/**",
+			"* @type {import('vorth').vorthData<true, ${1:signalValueType}>}",
+			"*/",
+			"export const data = async function () {",
+			"/t${2:const { ${3:} \\}} = this;",
+			"/t// return ;",
+			"}"
+		],
+		"description": "VorthDataDerived"
+	},
+	"tsVorthDataDerived": {
+		"scope": "typescript",
+		"prefix": ">>dataDerived",
+		"body": [
+			"import type { vorthData } from 'vorth';",
+			"",
+			"export const data: vorthData<true, ${1:signalValueType}> = async function () {",
+			"/t${2:const { ${3:} \\}} = this;",
+			"/t// return ;",
+			"}"
+		],
+		"description": "tsVorthDataDerived"
 	},
 	"VorthLib": {
 		"scope": "javascript",
@@ -79,11 +108,8 @@
 			"/**",
 			"* @type {import('vorth').vorthLib<(${1:...argumentsTypes})=>Promise<${3:returnType}>>}",
 			"*/",
-			"export const lib = async (",
-			"{${4:...vorthOptions}},",
-			"${2:parameters}",
-			") => {",
-			"\t${0://code}",
+			"export const lib = async ( ${2:parameters} ) {",
+			"\t${4:const { ${5:} \\} = this;}",
 			"};"
 		],
 		"description": "VorthLib"
@@ -94,11 +120,8 @@
 		"body": [
 			"import type { vorthLib } from 'vorth';",
 			"",
-			"export const lib: vorthLib<(${1:...argumentsTypes})=>Promise<${3:returnType}>> = async (",
-			"{${4:...vorthOptions}},",
-			"${2:parameters}",
-			") => {",
-			"\t${0://code}",
+			"export const lib: vorthLib<(${1:...argumentsTypes})=>Promise<${3:returnType}>> = async function( ${2:parameters} ) {",
+			"\t${4:const { ${5:} \\} = this;}",
 			"};"
 		],
 		"description": "tsVorthLib"
@@ -109,8 +132,8 @@
 		"body": [
 			"import type { vorthLifecycle } from 'vorth';",
 			"",
-			"export const lifecycle: vorthLifecycle = async ({${1:...vorthLifecycleOptions}}) => {",
-			"\t${0:// code}",
+			"export const lifecycle: vorthLifecycle = async function (){",
+			"\t${1:const { ${2:} \\} = this;}",
 			"};"
 		],
 		"description": "tsVorthLifecycle"
@@ -123,8 +146,8 @@
 			"/**",
 			"* @type {import('vorth').vorthLifecycle}",
 			"*/",
-			"export const lifecycle = async ({${1:...vorthLifecycleOptions}}) => {",
-			"\t",
+			"export async function lifecycle () {",
+			"\t${1:const { ${2:} \\} = this;}",
 			"}"
 		],
 		"description": "VorthLifecycle"

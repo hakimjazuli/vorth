@@ -12,8 +12,8 @@
  * >>- less then `10KB` gzipped
  * >- 🎯 declarative;
  * >>- dom reactivity follows this pattern:[`attributeName`="`attributeOrPropertySelector1`;`attributeOrPropertySelector2`;...;`attributeOrPropertySelectorN`"], to reflect and bind the input to the signal value `realtime`;
- * >- `v0.12.x`<strike></strike> 🗜 `prebundled-first` approach;
- * >>- core are already prebuild in this `npm or github` `./vorthInitiator.mjs`;
+ * >- `v0.12.x`<strike> 🗜 `prebundled-first` approach</strike>;
+ * >>-<strike> core are already prebuild in this `npm or github` `./vorthInitiator.mjs`</strike>;
  * >>- we drop this feature, in order to achieve full typehint support;
  * >- 📃 comprehensive typehint;
  * >>- <b>`vorth`</b> functionality are fully `typehinted`,
@@ -110,6 +110,9 @@
  * >>- updated <b>`virst`</b> version for security;
  * >>- example with `html` file;
  * >>- `for_.of` also returns parentData;
+ * >- `v0.13.x`:
+ * >>- main `modules`<sub>(`lifecycles`, `derivedData`, and `libs`)</sub> `options` are no longer passed to `arg0` but are binded to `this` for each `modules`;
+ * >>>- reasoning by doing this, you need no longer to scroll to function declaration and `destructure`/`unwrap` `arg0`, all you need to do is refer `this.${optionName}` directly on the line you need to call that option, while ofcourse `destructure`/`unwrap` `this` is also an option; 
  * 
  */
 export { shared } from './src//shared.export.mjs';
@@ -129,7 +132,7 @@ export { __vorthConfig } from './src//__vorthConfig.mjs';
  */
 /**
  * @template {(...any:any)=>Promise<any>} F
- * @typedef {(vorthLifecycleOptions:import('./src/lifecycles/vorthLifecycle.mjs').vorthLifecycleOptions, ...paramsTypes:Parameters<F>)=>ReturnType<F>} vorthLib
+ * @typedef {(this:import('./src/lifecycles/vorthLifecycle.mjs').vorthLifecycleOptions, ...paramsTypes:Parameters<F>)=>ReturnType<F>} vorthLib
  */
 /**
  * @typedef {import('vorth/src/lifecycles/lifecyclesList.mjs').lifecyclesList} lifecyclesList

@@ -1,5 +1,7 @@
 // @ts-check
 
+import { importData } from '../data/importData.mjs';
+
 /**
  * @typedef {import('vorth/src/lifecycles/lifecyclesList.mjs').lifecyclesList} lifecyclesList
  * @typedef {import('vorth/src/workers/workersList.mjs').workersList} workersList
@@ -32,6 +34,9 @@
  * - inner: call this method to modify the innerHTML of current `element` `lifecycle` `innerHTML` with the rendered string;
  * @property {import('../data/importData.mjs').importData} importData
  * - typesafe import for data;
+ * @property {import('../data/importDatas.mjs').importDatas} importDatas
+ * - typesafe import for datas;
+ * - usefull for creating without manually using multiple `importData`;
  * @property {import('../libs/importLib.mjs').importLib} importLib
  * - typesafe import for libs;
  * @property {typeof import('vorth/src/workers/importWorker.mjs').importWorker} importWorker
@@ -58,9 +63,11 @@
  * - manually trigger lifecycle on an element;
  * @property {import('vorth').onViewPortCallback} onViewPort
  * - onViewPort helper for current element lifecycle;
+ * @property {typeof Promise["all"]} promises
+ * - onViewPort helper for current element lifecycle;
  */
 /**
- * @typedef {(vorthLifecycleOptions:vorthLifecycleOptions)=>Promise<void>} vorthLifecycle
+ * @typedef {(this:vorthLifecycleOptions)=>Promise<void>} vorthLifecycle
  */
 /**
  * @typedef {import('virst').onViewCallbackOptions} onViewCallbackOptions
@@ -75,7 +82,7 @@
  * typecheck
  * @type {vorthLifecycle}
  */
-export const lifecycle = async (vorth) => {
+const lifecycle = async function () {
 	const {
 		$,
 		attr,
@@ -96,7 +103,7 @@ export const lifecycle = async (vorth) => {
 		qUnique,
 		select,
 		triggerLifecycle,
-	} = vorth;
+	} = this;
 	$(async () => {});
 	attr({
 		async domReflect() {

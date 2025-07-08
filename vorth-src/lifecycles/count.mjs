@@ -1,7 +1,8 @@
 // @ts-check
 
 /** @type {import('vorth').vorthLifecycle} */
-export const lifecycle = async ({ html, attr, importData, importLib }) => {
+export async function lifecycle() {
+	const { html, attr, importData, importLib } = this;
 	const [countLet, log_] = await Promise.all([importData('count'), importLib('log')]);
 	html`<div
 			${attr({
@@ -59,4 +60,4 @@ export const lifecycle = async ({ html, attr, importData, importLib }) => {
 		>
 			+
 		</button>`.inner();
-};
+}
