@@ -112,7 +112,7 @@
  * >>- `for_.of` also returns parentData;
  * >- `v0.13.x`:
  * >>- main `modules`<sub>(`lifecycles`, `derivedData`, and `libs`)</sub> `options` are no longer passed to `arg0` but are binded to `this` for each `modules`;
- * >>>- reasoning by doing this, you need no longer to scroll to function declaration and `destructure`/`unwrap` `arg0`, all you need to do is refer `this.${optionName}` directly on the line you need to call that option, while ofcourse `destructure`/`unwrap` `this` is also an option; 
+ * >>>- reasoning by doing this, you need no longer to scroll to function declaration and `destructure`/`unwrap` `arg0`, all you need to do is refer `this.${optionName}` directly on the line you need to call that option, while ofcourse `destructure`/`unwrap` `this` is also an option;
  * 
  */
 export { shared } from './src//shared.export.mjs';
