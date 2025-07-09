@@ -4,7 +4,7 @@ import { Q } from 'virst';
 import { importData } from './importData.mjs';
 
 /**
- * @template {Partial<Record<import('./dataList.type.mjs').dataList, ''>>} T
+ * @template {Partial<Record<import('vorth').dataList, ''>>} T
  * @param {T} paths
  * @param {import('../lifecycles/vorthLifecycle.mjs').vorthLifecycleOptions} [lifecycleOptions]
  * - auto filled by Vorth, keep it unfilled!!!;

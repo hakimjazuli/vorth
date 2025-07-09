@@ -12,11 +12,11 @@ import { importDatas } from './data/importDatas.mjs';
 
 /**
  * @typedef {import('vorth/src/data/dataList.mjs').dataList} dataList
- * @typedef {import('./sharedTypes.type.mjs').onViewPortCallback} onViewPortCallback
- * @typedef {import('./sharedTypes.type.mjs').anyButUndefined} anyButUndefined
- * @typedef {import('./sharedTypes.type.mjs').VorthNamespace} VorthNamespace
- * @typedef {import('./sharedTypes.type.mjs').VorthDomReflect} VorthDomReflect
- * @typedef {import('./sharedTypes.type.mjs').vorthLifecycleOptions} vorthLifecycleOptions
+ * @typedef {import('vorth').onViewPortCallback} onViewPortCallback
+ * @typedef {import('vorth').anyButUndefined} anyButUndefined
+ * @typedef {import('vorth').VorthNamespace} VorthNamespace
+ * @typedef {import('vorth').VorthDomReflect} VorthDomReflect
+ * @typedef {import('vorth').vorthLifecycleOptions} vorthLifecycleOptions
  */
 /**
  * @description
@@ -636,7 +636,7 @@ export class Vorth {
 		Vorth.#assignProperties();
 		/**
 		 * @param {string} relativePath
-		 * @returns {Promise<import('./vorthLib.type.mjs/index.js').vorthLib<any, any>>}
+		 * @returns {Promise<import('vorth').vorthLib<any, any>>}
 		 */
 		Vorth.#assignLifecycle();
 	}

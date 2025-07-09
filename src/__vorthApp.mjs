@@ -326,7 +326,7 @@ export const lifecycleAttr = (lifecycleName, bypasWaitOnViewToRender = false) =>
 /**
  * @template receiveMainThread
  * @template postWorkerThread
- * @typedef {import('./vorthWorker.type.mjs').vorthWorker<receiveMainThread, postWorkerThread>} vorthWorker
+ * @typedef {import('vorth').vorthWorker<receiveMainThread, postWorkerThread>} vorthWorker
  */`;
 							}
 							break;
