@@ -1,7 +1,5 @@
 // @ts-check
 
-import { importData } from '../data/importData.mjs';
-
 /**
  * @typedef {import('vorth/src/lifecycles/lifecyclesList.mjs').lifecyclesList} lifecyclesList
  * @typedef {import('vorth/src/workers/workersList.mjs').workersList} workersList

@@ -2,7 +2,6 @@
 
 import { Let, WorkerMainThread, Ping, Q } from 'virst';
 import { Vorth } from '../Vorth.mjs';
-import { importData } from 'src/data/importData.mjs';
 /**
  * @typedef {import('vorth/src/workers/workersList.mjs').workersList} workerList
  */

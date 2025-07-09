@@ -2,21 +2,7 @@
 
 /** @type {import('vorth').vorthLifecycle} */
 export const lifecycle = async function () {
-	const {
-		html,
-		lifecycleAttr,
-		importData,
-		let_,
-		$,
-		importLib,
-		importWorker,
-		attr,
-		onAttributeChanged,
-		on,
-		derived,
-		select,
-	} = this;
-	on({
+	this.on({
 		mouseenter: {
 			listener() {
 				console.log({ mouseEnter: 'Enter dari on' });
@@ -28,17 +14,17 @@ export const lifecycle = async function () {
 			},
 		},
 	});
-	onAttributeChanged(async ({ attr, newValue }) => {
+	this.onAttributeChanged(async ({ attr, newValue }) => {
 		if (attr === 'hehe') {
 			console.log(`${newValue} from hehe tapi dari app`);
 		}
 	});
-	onAttributeChanged(async ({ attr, newValue }) => {
+	this.onAttributeChanged(async ({ attr, newValue }) => {
 		if (attr === 'app') {
 			console.log(`${newValue} from app`);
 		}
 	});
-	select('haha', {
+	this.select('haha', {
 		isGlobal: false,
 		async lifecycle({ onDisconnected }) {
 			this.innerText = 'modified dari app.mjs';
@@ -48,11 +34,11 @@ export const lifecycle = async function () {
 		},
 	});
 	const duniaKeAttr = 'dunia-ke';
-	const gjh = let_({
+	const gjh = this.let_({
 		attr: 'gjh',
 		data: 'helo dari gajah',
 	});
-	select('haha-check', {
+	this.select('haha-check', {
 		waitForOnViewToRender: true,
 		on: {
 			mouseenter: {
@@ -64,28 +50,28 @@ export const lifecycle = async function () {
 	});
 	const [log_, let__, derived_, { resultSignal: testSignal, postMessage }, datas] =
 		await this.promises([
-			importLib('log'),
-			importData('let_'),
-			importData('derived'),
-			importWorker('test'),
+			this.importLib('log'),
+			this.importData('let_'),
+			this.importData('derived'),
+			this.importWorker('test'),
 			this.importDatas({ count: '' }),
 		]);
-	html`
+	this.html`
 		<div haha-check derived-class="class" class="other class why not">haha-check</div>
 		<div haha-check ${gjh.attr}="innerHTML" style="word-wrap: break-word;">
 			hello dunia dari app
 		</div>
-		<div haha-check ${lifecycleAttr('multiref')}>check</div>
-		<div id="test-haha" haha-check ${lifecycleAttr('test')}>
+		<div haha-check ${this.lifecycleAttr('multiref')}>check</div>
+		<div id="test-haha" haha-check ${this.lifecycleAttr('test')}>
 			<div haha>must not be permanent_</div>
 		</div>
-		<div haha-check ${lifecycleAttr('count')}>must not be permanent_</div>
+		<div haha-check ${this.lifecycleAttr('count')}>must not be permanent_</div>
 		<div>
 			<textarea ${duniaKeAttr}="value" autofocus></textarea>
 		</div>
 		<div>
 			<span
-				${attr({
+				${this.attr({
 					async domReflect() {
 						if (let__.value.includes('derived')) {
 							return { class: 'woho ada derived' };
@@ -114,16 +100,16 @@ export const lifecycle = async function () {
 			>
 		</div>
 	`.inner();
-	onAttributeChanged(async ({ attr, newValue }) => {
+	this.onAttributeChanged(async ({ attr, newValue }) => {
 		if (attr === 'hehe') {
 			console.log(`${newValue} from hehe`);
 		}
 	});
-	const duniaKe = let_({
+	const duniaKe = this.let_({
 		attr: duniaKeAttr,
 		data: let__.value,
 	});
-	derived({
+	this.derived({
 		attr: 'derived-class',
 		async data() {
 			if (let__.value.includes('derived')) {
@@ -134,19 +120,19 @@ export const lifecycle = async function () {
 			return { class: '' };
 		},
 	});
-	$(async () => {
+	this.$(async () => {
 		log_({ a: (let__.value = duniaKe.value.toString()), b: 99 });
 	});
-	$(async () => {
+	this.$(async () => {
 		console.log({ oaerkuhakruhea: datas.count.value });
 	});
 
-	$(async () => {
+	this.$(async () => {
 		const value = derived_.value;
 		console.log({ derivedValue: derived_.value });
 		postMessage({ mainThreadSays: value });
 	});
-	$(async () => {
+	this.$(async () => {
 		const value = testSignal.value;
 		if (!('data' in value)) {
 			return;
