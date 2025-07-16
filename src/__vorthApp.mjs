@@ -120,9 +120,9 @@ export class __vorthApp {
 	 * @returns {void}
 	 */
 	static cleanupTarget = () => {
-		this.queueFIFOHandler.assign(
+		__vorthApp.queueFIFOHandler.assign(
 			new _QueueObjectFIFO(async () => {
-				const deletePath = this.target;
+				const deletePath = __vorthApp.target;
 				const stats = existsSync(deletePath) ? statSync(deletePath) : null;
 				if (stats && stats.isDirectory()) {
 					rmSync(deletePath, { recursive: true, force: true });
@@ -149,7 +149,7 @@ export class __vorthApp {
 		const entries = readdirSync(dirPath, { withFileTypes: true });
 		for (const entry of entries) {
 			if (entry.isDirectory()) {
-				this.readFilesNestedSync(join(dirPath, entry.name), fileList);
+				__vorthApp.readFilesNestedSync(join(dirPath, entry.name), fileList);
 			} else if (entry.isFile()) {
 				fileList.push(entry);
 			}
@@ -169,7 +169,7 @@ export class __vorthApp {
 	 * @param {import('fs').Stats} [_]
 	 */
 	static generateType = async (path_, _) => {
-		const relative = path_.replace(this.sourcePath, '').replace(/\//g, '\\').split('\\');
+		const relative = path_.replace(__vorthApp.sourcePath, '').replace(/\//g, '\\').split('\\');
 		let typeof_ = '';
 		const typeof__ = relative[0];
 		relative.shift();
@@ -185,14 +185,14 @@ export class __vorthApp {
 		if (!typeof_) {
 			return;
 		}
-		this.queueUniqueHandler.assign(
+		__vorthApp.queueUniqueHandler.assign(
 			new _QueueObject(
 				typeof_,
 				async () => {
 					const fileBaseName = `${typeof_}List`;
-					const file_ = join(this.resolvedCorePath, typeof_, `${fileBaseName}.mjs`);
-					const folder_ = join(this.sourcePath, typeof_);
-					const files_ = this.readFilesNestedSync(folder_);
+					const file_ = join(__vorthApp.resolvedCorePath, typeof_, `${fileBaseName}.mjs`);
+					const folder_ = join(__vorthApp.sourcePath, typeof_);
+					const files_ = __vorthApp.readFilesNestedSync(folder_);
 					const listName = [];
 					const fileNames = [];
 					for (let i = 0; i < files_.length; i++) {
@@ -201,7 +201,7 @@ export class __vorthApp {
 						fileNames.push(fileName);
 						listName.push(
 							fileName
-								.replace(this.sourcePath.replace(/\\/g, '/'), '')
+								.replace(__vorthApp.sourcePath.replace(/\\/g, '/'), '')
 								.replace('/', '')
 								.replace(typeof_, '')
 								.replace(extname(file__.name), '')
@@ -221,17 +221,23 @@ export class __vorthApp {
 						case paths.data:
 							{
 								const extender = ['void'];
+								const Let_s = [];
+								const LetExtender = ['void'];
 								for (let i = 0; i < fileNames.length; i++) {
-									const [_, isDerived, dataType] = this.getFileContentWithRegex(
+									const [_, isDerived, dataType] = __vorthApp.getFileContentWithRegex(
 										fileNames[i],
 										/vorthData<(.+?),(.+?)>/s
 									);
 									const name = listName[i];
 									const dataType_ = __vorthApp.tsToJsType(dataType);
-									const mode =
-										isDerived === 'true'
-											? `import('virst').Derived<${dataType_}>`
-											: `import('virst').Let<${dataType_}>`;
+									let mode = '';
+									if (isDerived === 'true') {
+										mode = `import('virst').Derived<${dataType_}>`;
+									} else {
+										mode = `import('virst').Let<${dataType_}>`;
+										Let_s.push(name);
+										LetExtender.unshift(`T extends '${name}'?${mode}`);
+									}
 									extender.unshift(`T extends '${name}'?${mode}`);
 								}
 								modifiedContent = `${modifiedContent}
@@ -241,6 +247,18 @@ export class __vorthApp {
  * @param {import('vorth').vorthLifecycleOptions} [_]
  * - auto filled by Vorth, keep it unfilled!!!;
  * @returns {Promise<${extender.join(':')}>}
+ */
+/**
+ * @typedef {'${Let_s.join("'|'")}'} LetList
+ */
+/**
+ * @template {LetList} T
+ * @callback importLets
+ * @param {T} relativePath
+ * - relativePath of data inside \`data\`;
+ * @param {import('vorth').vorthLifecycleOptions} [_]
+ * - auto filled by Vorth, keep it unfilled!!!;
+ * @returns {Promise<${LetExtender.join(':')}>}
  */`;
 							}
 							break;
@@ -248,7 +266,7 @@ export class __vorthApp {
 							{
 								const extender = ['void'];
 								for (let i = 0; i < fileNames.length; i++) {
-									const [_, args, awaitedReturnType] = this.getFileContentWithRegex(
+									const [_, args, awaitedReturnType] = __vorthApp.getFileContentWithRegex(
 										fileNames[i],
 										/vorthLib<\s*\(([^)]+)\)\s*=>\s*Promise\s*<([^>]+)>/m
 									);
@@ -285,7 +303,7 @@ export const lifecycleAttr = (lifecycleName, bypasWaitOnViewToRender = false) =>
 							{
 								let lists = ['void'];
 								for (let i = 0; i < listName.length; i++) {
-									const matches = this.getFileContentWithRegex(
+									const matches = __vorthApp.getFileContentWithRegex(
 										fileNames[i],
 										/type\s+(receive|post)\s*=\s*([\[{][\s\S]*?[\]}]);|@typedef\s+\{\{([^}]+)\}\}\s+(receive|post)|@typedef\s+\{([^}]+)\}\s+(receive|post)/gm
 									);
@@ -368,12 +386,12 @@ export const lifecycleAttr = (lifecycleName, bypasWaitOnViewToRender = false) =>
 	 * @returns {void}
 	 */
 	static handler = (path_, stats, unlink = false) => {
-		this.queueFIFOHandler.assign(
+		__vorthApp.queueFIFOHandler.assign(
 			new _QueueObjectFIFO(async () => {
-				await this.trueBundleAndMinify(path_, unlink);
+				await __vorthApp.trueBundleAndMinify(path_, unlink);
 			})
 		);
-		this.generateType(path_, stats);
+		__vorthApp.generateType(path_, stats);
 	};
 	/**
 	 * @private
@@ -387,11 +405,11 @@ export const lifecycleAttr = (lifecycleName, bypasWaitOnViewToRender = false) =>
 					if (result.errors.length > 0) {
 						return;
 					}
-					this.queueUniqueHandler.assign(
+					__vorthApp.queueUniqueHandler.assign(
 						new _QueueObject(
 							'cleanHTML-whitespace',
 							async () => {
-								const outputDirents = this.readFilesNestedSync(this.target);
+								const outputDirents = __vorthApp.readFilesNestedSync(__vorthApp.target);
 								for (let i = 0; i < outputDirents.length; i++) {
 									const dirent = outputDirents[i];
 									if (!dirent.name.endsWith('.mjs')) {
@@ -445,8 +463,8 @@ export const lifecycleAttr = (lifecycleName, bypasWaitOnViewToRender = false) =>
 			default:
 				return;
 		}
-		const target = this.target;
-		const sourcePath = this.sourcePath;
+		const target = __vorthApp.target;
+		const sourcePath = __vorthApp.sourcePath;
 		const toDir = from.replace(sourcePath, target);
 		const to = toDir.replace(extention, '.mjs');
 		try {
@@ -485,15 +503,15 @@ export const lifecycleAttr = (lifecycleName, bypasWaitOnViewToRender = false) =>
 			await esbuild.build({
 				entryPoints: [from],
 				outdir: relativeTarget,
-				minify: this.minify,
+				minify: __vorthApp.minify,
 				format: 'esm',
 				bundle: true,
-				absWorkingDir: this.basePath,
+				absWorkingDir: __vorthApp.basePath,
 				treeShaking: true,
 				outExtension: {
 					'.js': '.mjs',
 				},
-				plugins: this.plugins,
+				plugins: __vorthApp.plugins,
 				banner: {
 					js: `/** @module */`, // Ensures module-level JSDoc is included
 				},

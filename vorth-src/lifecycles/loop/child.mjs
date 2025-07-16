@@ -19,7 +19,7 @@ export const lifecycle = async function () {
 				on: {
 					click: {
 						async listener() {
-							const looped =  parentData;
+							const looped = parentData;
 							const newOne = looped.value.length;
 							looped.value.push({ a: `${newOne + 1}`, b: `b${newOne + 1}` });
 							looped.call$();
@@ -33,7 +33,7 @@ export const lifecycle = async function () {
 				on: {
 					click: {
 						async listener() {
-							const looped =  parentData;
+							const looped = parentData;
 							looped.value.splice(child.index, 1);
 							looped.call$();
 						},

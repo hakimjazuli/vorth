@@ -1,19 +1,27 @@
 // @ts-check
+
+import { NewPingUnique } from 'vivth';
+
 /**
- * @typedef {{mainThreadSays:string}} receive
- * @typedef {{theTestWorkerSays:string}} post
+ * @typedef {{ mainThreadSays:string }} receive
+ * @typedef {{ theTestWorkerSays:string }} post
  * @typedef {import('vorth').vorthWorker<receive, post>} workerType
  */
 /**
- * @type {(this: WindowEventHandlers, event: workerType['receive']['worker']) =>Promise<any>}
+ * @type {(this: WindowEventHandlers, event: workerType['receive']['worker']) => Promise<any>}
  */
 onmessage = async function (event) {
-	console.log({ event });
-	/**
-	 * @type {workerType['post']['worker']}
-	 */
-	const rest = {
-		theTestWorkerSays: `hi..... ${event.data.mainThreadSays}`,
-	};
-	postMessage(rest);
+	NewPingUnique(
+		'',
+		async () => {
+			/**
+			 * @type {workerType['post']['worker']}
+			 */
+			const rest = {
+				theTestWorkerSays: `hi..... ${event.data.mainThreadSays}`,
+			};
+			postMessage(rest);
+		},
+		1000
+	);
 };

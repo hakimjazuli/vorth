@@ -1,7 +1,7 @@
 // @ts-check
 
 /**
- * @typedef {Object} shadredTypes
+ * @typedef {Object} sharedTypes
  * @typedef {(onViewCallback: import('virst').onViewPortHandler['onViewPort']) => import('virst').onViewPort} onViewPortCallback
  * @typedef {{}|null|number|string|boolean|symbol|bigint|function} anyButUndefined
  * @typedef {'vorth'} VorthNamespace

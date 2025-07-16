@@ -2,8 +2,11 @@
 
 /** @type {import('vorth').vorthLifecycle} */
 export async function lifecycle() {
-	const { html, attr, importData, importLib } = this;
-	const [countLet, log_] = await Promise.all([importData('count'), importLib('log')]);
+	const { html, attr, importDatas, importLib } = this;
+	const [{ count: countLet }, log_] = await Promise.all([
+		importDatas({ count: '' }),
+		importLib('log'),
+	]);
 	html`<div
 			${attr({
 				async lifecycle({ $, onDisconnected }) {

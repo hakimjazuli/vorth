@@ -2,8 +2,8 @@
 
 /** @type {import('vorth').vorthLifecycle} */
 export const lifecycle = async function () {
-	const { html, importData, attr } = this;
-	const let__ = await importData('let_');
+	const { html, importDatas, attr } = this;
+	const { let_: let__ } = await importDatas({ let_: '' });
 	html`
 		<div
 			style="word-wrap: break-word;"

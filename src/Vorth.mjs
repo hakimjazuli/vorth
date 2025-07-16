@@ -8,6 +8,7 @@ import { importWorker } from './workers/importWorker.mjs';
 import { select } from './lifecycles/select.mjs';
 import { on } from './lifecycles/on.mjs';
 import { shared } from './shared.export.mjs';
+import { importLets } from './data/importLets.mjs';
 import { importDatas } from './data/importDatas.mjs';
 
 /**
@@ -66,6 +67,7 @@ import { importDatas } from './data/importDatas.mjs';
  *	- will be posted in [html-first documentation website](https://html-first.bss.design/)
  */
 export class Vorth {
+	static promises = async (a) => await Promise.all(a);
 	/**
 	 * @type {VorthNamespace}
 	 */
@@ -187,7 +189,7 @@ export class Vorth {
 	}
 	/**
 	 * @template {import('vorth/src/workers/workersList.mjs').workersList} K
-	 * @typedef {Map<K, { resultSignal: Let<MessageEvent>, postMessage: Worker["postMessage"] }>} WorkerCacheType
+	 * @typedef {Map<K, { worker:Worker, resultSignal: Let<MessageEvent>, postMessage: Worker["postMessage"] }>} WorkerCacheType
 	 */
 	/** @type {WorkerCacheType<import('vorth/src/workers/workersList.mjs').workersList>} */
 	static cachedWorker = new Map();
@@ -572,8 +574,8 @@ export class Vorth {
 			lifecycleAttr,
 			importWorker,
 			on: new on(element, onDisconnected).on,
-			importData: async (relativePath) => await importData(relativePath, vorth),
-			importDatas: (paths) => importDatas(paths, vorth),
+			importDatas: async (relativePath) => await importDatas(relativePath, vorth),
+			importLets: (paths) => importLets(paths, vorth),
 			select: (attributeName, options) => select(attributeName, options, element, false),
 			attr: ({ on, domReflect, lifecycle, waitForOnViewToRender = true }) =>
 				select(
@@ -597,7 +599,7 @@ export class Vorth {
 			let_: (obj) => Vorth.let(obj, element, signals, effects),
 			derived: (obj) => Vorth.derived(obj, element, signals, effects),
 			onViewPort,
-			promises: async (a) => Promise.all(a),
+			promises: Vorth.promises,
 		};
 		await importedLifecycle.call(vorth);
 	};

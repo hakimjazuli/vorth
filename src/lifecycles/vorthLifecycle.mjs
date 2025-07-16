@@ -30,17 +30,18 @@
  * @property {(strings:TemplateStringsArray,...values:string[])=>{inner:()=>void, string:string}} html
  * - string: rendered string;
  * - inner: call this method to modify the innerHTML of current `element` `lifecycle` `innerHTML` with the rendered string;
- * @property {import('../data/importData.mjs').importData} importData
- * - typesafe import for data;
  * @property {import('../data/importDatas.mjs').importDatas} importDatas
  * - typesafe import for datas;
- * - usefull for creating without manually using multiple `importData`;
+ * @property {import('../data/importLets.mjs').importLets} importLets
+ * - typesafe import for Lets;
+ * - usefull for getting values of multiple `Let`s instance of `data`;
+ * >- eg. to be synced with file system or server database;
  * @property {import('../libs/importLib.mjs').importLib} importLib
  * - typesafe import for libs;
  * @property {typeof import('vorth/src/workers/importWorker.mjs').importWorker} importWorker
- * - typesafe import for data;
+ * - typesafe import for workers;
  * @property {Vorth["let"]} let_
- * - dataOnly?: reactive signla withou `DOM`;
+ * - dataOnly?: reactive signla without `DOM`;
  * - data?: use ase state without `domReflector`;
  * - attr?: to reflect the value to the DOM;
  * - returns `Let<returnOfSignal>`;
@@ -88,7 +89,7 @@ const lifecycle = async function () {
 		element,
 		for_,
 		html,
-		importData,
+		importDatas,
 		importLib,
 		importWorker,
 		let_,
@@ -163,12 +164,9 @@ const lifecycle = async function () {
 	{
 		const { inner, string } = html`<div>hehe</div>`;
 	}
-	{
-		const { attr, call$, remove$, removeAll$, unRef, value } = await importData('count');
-	}
-	{
-		const { attr, call$, remove$, removeAll$, unRef, value } = await importData('derived');
-	}
+	const [{ count, derived: derivedData }] = await this.promises([
+		importDatas({ count: '', derived: '' }),
+	]);
 	{
 		const log_ = await importLib('log');
 		log_({ a: '', b: 0 });

@@ -7,7 +7,9 @@
  */
 /**
  * @typedef {Object} derivedFuntionOptions
- * @property {import('./importData.mjs').importData} importData
+ * @property {import('vorth').vorthLifecycleOptions["promises"]} promises
+ * @property {import('./importDatas.mjs').importDatas} importDatas
+ * @property {import('./importLets.mjs').importLets} importLets
  * @property {import('../libs/importLib.mjs').importLib} importLib
  * @property {import('vorth/src/workers/importWorker.mjs').importWorker} importWorker
  * @property {typeof import('virst').Q["unique"]} qUnique

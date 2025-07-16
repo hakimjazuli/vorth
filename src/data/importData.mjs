@@ -5,6 +5,8 @@ import { Vorth } from '../Vorth.mjs';
 import { importLib } from '../libs/importLib.mjs';
 import { importWorker } from '../workers/importWorker.mjs';
 import { keyValueindexedDB } from './keyValueindexedDB.mjs';
+import { importDatas } from './importDatas.mjs';
+import { importLets } from './importLets.mjs';
 
 /**
  * @param { string } keyPrefix
@@ -141,7 +143,9 @@ export const importData = async (relativePath, lifecycleOptions) => {
 			const options = {
 				qFIFO: Q.fifo,
 				qUnique: Q.unique,
-				importData: async (relativePath) => await importData(relativePath, lifecycleOptions),
+				promises: Vorth.promises,
+				importDatas: async (relativePath) => await importDatas(relativePath, lifecycleOptions),
+				importLets: async (relativePath) => await importLets(relativePath, lifecycleOptions),
 				// @ts-expect-error
 				importLib: async (relativePath) => {
 					const lib = await importLib(relativePath);

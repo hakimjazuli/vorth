@@ -33,7 +33,7 @@ refer to [virst](https://www.npmjs.com/package/virst):
 
 <b>!!!avoid importing on the endpoint!!!</b>
 - there are cases that browser would `autocache` the imported library;
-- we already profided `importData`, `importLib`, and `importWorker` that will optimize the cache with the browser session;
+- we already profided `importDatas`, `importLets`, `importLib`, and `importWorker` that will optimize the cache with the browser session;
 - if you use `__vorthApp` and find generated endpoint contains static import statement, please report as bug, along with the source and the produced endpoint;
 
 <b>!!!avoid importing on the endpoint!!!</b>
@@ -106,6 +106,12 @@ versions
 >- `v0.13.x`:
 >>- main `modules`<sub>(`lifecycles`, `derivedData`, and `libs`)</sub> `options` are no longer passed to `arg0` but are binded to `this` for each `modules`;
 >>>- reasoning by doing this, you need no longer to scroll to function declaration and `destructure`/`unwrap` `arg0`, all you need to do is refer `this.${optionName}` directly on the line you need to call that option, while ofcourse `destructure`/`unwrap` `this` is also an option;
+>- `v0.14.x`:
+>>- added `indexedDB` for `data`;
+>>- move `options`.`importData` to `importDatas`, mainly for concise imports on single command instead of multiple calls;
+>>- added `options`.`importLets`, essentially the same as `importDatas` but only for pure non `derived` `signal`;
+>>- added helper using `options`.`promises`, it is just syntatic sugar for `Promise.all`;
+>>- added `vivth` to dependency for workerThread, use `vivth.NewPingUnique` to optimize rapid calls, although it will slightly increase the file size, however the optimized calls should be worth the size;
 
 ## importable-classes
 - [Vorth](#vorth)

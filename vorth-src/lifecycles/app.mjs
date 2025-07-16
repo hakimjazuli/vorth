@@ -48,14 +48,17 @@ export const lifecycle = async function () {
 			},
 		},
 	});
-	const [log_, let__, derived_, { resultSignal: testSignal, postMessage }, datas] =
-		await this.promises([
-			this.importLib('log'),
-			this.importData('let_'),
-			this.importData('derived'),
-			this.importWorker('test'),
-			this.importDatas({ count: '' }),
-		]);
+	const [
+		log_,
+		{ let_: let__, derived: derived_ },
+		datas,
+		{ resultSignal: testSignal, postMessage },
+	] = await this.promises([
+		this.importLib('log'),
+		this.importDatas({ let_: '', derived: '' }),
+		this.importLets({ count: '' }),
+		this.importWorker('test_'),
+	]);
 	this.html`
 		<div haha-check derived-class="class" class="other class why not">haha-check</div>
 		<div haha-check ${gjh.attr}="innerHTML" style="word-wrap: break-word;">
@@ -126,7 +129,6 @@ export const lifecycle = async function () {
 	this.$(async () => {
 		console.log({ oaerkuhakruhea: datas.count.value });
 	});
-
 	this.$(async () => {
 		const value = derived_.value;
 		console.log({ derivedValue: derived_.value });
