@@ -66,7 +66,31 @@ export class __vorthApp {
 					__vorthApp.handler(paths[path_], stats);
 				}
 			});
+		__vorthApp.#registerProcessExit();
 	}
+	static #isProcessExited = false;
+	static #exitEvents = [
+		'exit',
+		'uncaughtException',
+		'unhandledRejection',
+		'beforeExit',
+		'SIGHUP',
+		'SIGQUIT',
+	];
+	static #registerProcessExit = () => {
+		const exitEventNames = __vorthApp.#exitEvents;
+		for (let i = 0; i < exitEventNames.length; i++) {
+			process.on(exitEventNames[i], () => {
+				if (__vorthApp.#isProcessExited) {
+					return;
+				}
+				__vorthApp.#isProcessExited = true;
+				__vorthApp.watcher.removeAllListeners();
+				process.exit();
+			});
+		}
+	};
+
 	/**
 	 * @private
 	 * @type {import('esbuild').Plugin[]}
