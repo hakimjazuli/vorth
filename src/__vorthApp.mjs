@@ -17,6 +17,7 @@ import {
 import { join, basename, extname } from 'path';
 import { _Queue, _QueueFIFO, _QueueObject, _QueueObjectFIFO } from '@html_first/simple_queue';
 import { shared } from './shared.export.mjs';
+import { trySync } from 'vivth';
 
 export class __vorthApp {
 	/**
@@ -248,21 +249,23 @@ export class __vorthApp {
 								const Let_s = [];
 								const LetExtender = ['void'];
 								for (let i = 0; i < fileNames.length; i++) {
-									const [_, isDerived, dataType] = __vorthApp.getFileContentWithRegex(
-										fileNames[i],
-										/vorthData<(.+?),(.+?)>/s
-									);
-									const name = listName[i];
-									const dataType_ = __vorthApp.tsToJsType(dataType);
-									let mode = '';
-									if (isDerived === 'true') {
-										mode = `import('virst').Derived<${dataType_}>`;
-									} else {
-										mode = `import('virst').Let<${dataType_}>`;
-										Let_s.push(name);
-										LetExtender.unshift(`T extends '${name}'?${mode}`);
-									}
-									extender.unshift(`T extends '${name}'?${mode}`);
+									trySync(() => {
+										const [_, isDerived, dataType] = __vorthApp.getFileContentWithRegex(
+											fileNames[i],
+											/vorthData<(.+?),(.+?)>/s
+										);
+										const name = listName[i];
+										const dataType_ = __vorthApp.tsToJsType(dataType);
+										let mode = '';
+										if (isDerived === 'true') {
+											mode = `import('virst').Derived<${dataType_}>`;
+										} else {
+											mode = `import('virst').Let<${dataType_}>`;
+											Let_s.push(name);
+											LetExtender.unshift(`T extends '${name}'?${mode}`);
+										}
+										extender.unshift(`T extends '${name}'?${mode}`);
+									});
 								}
 								modifiedContent = `${modifiedContent}
  * @callback importData
@@ -290,16 +293,18 @@ export class __vorthApp {
 							{
 								const extender = ['void'];
 								for (let i = 0; i < fileNames.length; i++) {
-									const [_, args, awaitedReturnType] = __vorthApp.getFileContentWithRegex(
-										fileNames[i],
-										/vorthLib<\s*\(([^)]+)\)\s*=>\s*Promise\s*<([^>]+)>/m
-									);
-									const name = listName[i];
-									extender.unshift(
-										`T extends '${name}'?(${__vorthApp.tsToJsType(
-											args
-										)})=>Promise<${__vorthApp.tsToJsType(awaitedReturnType)}>`
-									);
+									trySync(() => {
+										const [_, args, awaitedReturnType] = __vorthApp.getFileContentWithRegex(
+											fileNames[i],
+											/vorthLib<\s*\(([^)]+)\)\s*=>\s*Promise\s*<([^>]+)>/m
+										);
+										const name = listName[i];
+										extender.unshift(
+											`T extends '${name}'?(${__vorthApp.tsToJsType(
+												args
+											)})=>Promise<${__vorthApp.tsToJsType(awaitedReturnType)}>`
+										);
+									});
 								}
 								modifiedContent = `${modifiedContent}
  * @callback importLib
@@ -327,34 +332,35 @@ export const lifecycleAttr = (lifecycleName, bypasWaitOnViewToRender = false) =>
 							{
 								let lists = ['void'];
 								for (let i = 0; i < listName.length; i++) {
-									const matches = __vorthApp.getFileContentWithRegex(
-										fileNames[i],
-										/type\s+(receive|post)\s*=\s*([\[{][\s\S]*?[\]}]);|@typedef\s+\{\{([^}]+)\}\}\s+(receive|post)|@typedef\s+\{([^}]+)\}\s+(receive|post)/gm
-									);
-									const typeOfWorker = {
-										receive: '',
-										post: '',
-									};
-									matches
-										.map((line) => {
-											line = line.replace(/\s/g, ' ').replace(/;/gm, ',') + ';';
-											const match =
-												/@typedef\s+\{\{(.+?)\}\}\s+(receive|post)|@typedef\s+\{(.+?)\}\s+(receive|post)|type\s+(receive|post)\s*=\s*(.+?);/.exec(
-													__vorthApp.tsToJsType(line) + ';'
-												);
-											if (!match) return null;
-											let name = match[2] || match[4] || match[5];
-											let type = match[1] ? `{${match[1]}}` : match[3] || match[6];
-											if (name in typeOfWorker) {
-												typeOfWorker[name] = type.replace(/\s/g, '');
-											}
-										})
-										.filter(Boolean);
-									lists.unshift(
-										`T extends'${listName[i]}'?vorthWorker<${typeOfWorker.receive},${typeOfWorker.post}>`
-									);
+									trySync(() => {
+										const matches = __vorthApp.getFileContentWithRegex(
+											fileNames[i],
+											/type\s+(receive|post)\s*=\s*([\[{][\s\S]*?[\]}]);|@typedef\s+\{\{([^}]+)\}\}\s+(receive|post)|@typedef\s+\{([^}]+)\}\s+(receive|post)/gm
+										);
+										const typeOfWorker = {
+											receive: '',
+											post: '',
+										};
+										matches
+											.map((line) => {
+												line = line.replace(/\s/g, ' ').replace(/;/gm, ',') + ';';
+												const match =
+													/@typedef\s+\{\{(.+?)\}\}\s+(receive|post)|@typedef\s+\{(.+?)\}\s+(receive|post)|type\s+(receive|post)\s*=\s*(.+?);/.exec(
+														__vorthApp.tsToJsType(line) + ';'
+													);
+												if (!match) return null;
+												let name = match[2] || match[4] || match[5];
+												let type = match[1] ? `{${match[1]}}` : match[3] || match[6];
+												if (name in typeOfWorker) {
+													typeOfWorker[name] = type.replace(/\s/g, '');
+												}
+											})
+											.filter(Boolean);
+										lists.unshift(
+											`T extends'${listName[i]}'?vorthWorker<${typeOfWorker.receive},${typeOfWorker.post}>`
+										);
+									});
 								}
-
 								const extender = lists.join(':');
 								modifiedContent = `${modifiedContent}
  */
